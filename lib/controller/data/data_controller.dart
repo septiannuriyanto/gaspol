@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gaspol/controller/data/db_controller.dart';
 import 'package:gaspol/models/gas_cylinder.dart';
 
 enum KeywordFoundStatus {
@@ -16,104 +17,118 @@ enum SearchCommand {
 
 class DataController extends ChangeNotifier {
   List<GasCylinder> _cylinderList = [
-    GasCylinder(
-        gasId: '831479',
-        gasName: 'Acetylene',
-        gasType: GasType.ACETYLENE,
-        dateRegistered: DateTime.now(),
-        location: "SUPPLIER",
-        registerStatus: RegisterStatus.REGISTERED),
-    GasCylinder(
-        gasId: '592384',
-        gasName: 'Oxygen',
-        gasType: GasType.OXYGENT,
-        dateRegistered: DateTime.now(),
-        location: "SUPPLIER",
-        registerStatus: RegisterStatus.REGISTERED),
-    GasCylinder(
-        gasId: '746281',
-        gasName: 'Nitrogen',
-        gasType: GasType.NITROGEN,
-        dateRegistered: DateTime.now(),
-        location: "SUPPLIER",
-        registerStatus: RegisterStatus.REGISTERED),
-    GasCylinder(
-        gasId: '358192',
-        gasName: 'Carbon',
-        gasType: GasType.CARBON,
-        dateRegistered: DateTime.now(),
-        location: "SUPPLIER",
-        registerStatus: RegisterStatus.REGISTERED),
-    GasCylinder(
-        gasId: '905612',
-        gasName: 'Acetylene',
-        gasType: GasType.ACETYLENE,
-        dateRegistered: DateTime.now(),
-        location: "SUPPLIER",
-        registerStatus: RegisterStatus.REGISTERED),
-    GasCylinder(
-        gasId: '263417',
-        gasName: 'Oxygen',
-        gasType: GasType.OXYGENT,
-        dateRegistered: DateTime.now(),
-        location: "SUPPLIER",
-        registerStatus: RegisterStatus.REGISTERED),
-    GasCylinder(
-        gasId: '374582',
-        gasName: 'Nitrogen',
-        gasType: GasType.NITROGEN,
-        dateRegistered: DateTime.now(),
-        location: "SUPPLIER",
-        registerStatus: RegisterStatus.REGISTERED),
-    GasCylinder(
-        gasId: '481306',
-        gasName: 'Carbon',
-        gasType: GasType.CARBON,
-        dateRegistered: DateTime.now(),
-        location: "SUPPLIER",
-        registerStatus: RegisterStatus.REGISTERED),
-    GasCylinder(
-        gasId: '192837',
-        gasName: 'Acetylene',
-        gasType: GasType.ACETYLENE,
-        dateRegistered: DateTime.now(),
-        location: "SUPPLIER",
-        registerStatus: RegisterStatus.REGISTERED),
-    GasCylinder(
-        gasId: '284756',
-        gasName: 'Oxygen',
-        gasType: GasType.OXYGENT,
-        dateRegistered: DateTime.now(),
-        location: "SUPPLIER",
-        registerStatus: RegisterStatus.REGISTERED),
-    GasCylinder(
-        gasId: '375648',
-        gasName: 'Nitrogen',
-        gasType: GasType.NITROGEN,
-        dateRegistered: DateTime.now(),
-        location: "SUPPLIER",
-        registerStatus: RegisterStatus.REGISTERED),
-    GasCylinder(
-        gasId: '493827',
-        gasName: 'Carbon',
-        gasType: GasType.CARBON,
-        dateRegistered: DateTime.now(),
-        location: "SUPPLIER",
-        registerStatus: RegisterStatus.REGISTERED),
-    GasCylinder(
-        gasId: '564738',
-        gasName: 'Acetylene',
-        gasType: GasType.ACETYLENE,
-        dateRegistered: DateTime.now(),
-        location: "SUPPLIER",
-        registerStatus: RegisterStatus.REGISTERED),
-    GasCylinder(
-        gasId: '687495',
-        gasName: 'Oxygen',
-        gasType: GasType.OXYGENT,
-        dateRegistered: DateTime.now(),
-        location: "SUPPLIER",
-        registerStatus: RegisterStatus.REGISTERED),
+    //   GasCylinder(
+    //       gasId: '831479',
+    //       gasName: 'Acetylene',
+    //       gasType: GasType.ACETYLENE,
+    //       dateRegistered: DateTime.now(),
+    //       location: "SUPPLIER",
+    //       registerStatus: RegisterStatus.REGISTERED,
+    //       gasContent: GasContent.EMPTY),
+    //   GasCylinder(
+    //       gasId: '592384',
+    //       gasName: 'Oxygen',
+    //       gasType: GasType.OXYGENT,
+    //       dateRegistered: DateTime.now(),
+    //       location: "SUPPLIER",
+    //       registerStatus: RegisterStatus.REGISTERED,
+    //       gasContent: GasContent.EMPTY),
+    //   GasCylinder(
+    //       gasId: '746281',
+    //       gasName: 'Nitrogen',
+    //       gasType: GasType.NITROGEN,
+    //       dateRegistered: DateTime.now(),
+    //       location: "SUPPLIER",
+    //       registerStatus: RegisterStatus.REGISTERED,
+    //       gasContent: GasContent.EMPTY),
+    //   GasCylinder(
+    //       gasId: '358192',
+    //       gasName: 'Carbon',
+    //       gasType: GasType.CARBON,
+    //       dateRegistered: DateTime.now(),
+    //       location: "SUPPLIER",
+    //       registerStatus: RegisterStatus.REGISTERED,
+    //       gasContent: GasContent.EMPTY),
+    //   GasCylinder(
+    //       gasId: '905612',
+    //       gasName: 'Acetylene',
+    //       gasType: GasType.ACETYLENE,
+    //       dateRegistered: DateTime.now(),
+    //       location: "SUPPLIER",
+    //       registerStatus: RegisterStatus.REGISTERED,
+    //       gasContent: GasContent.EMPTY),
+    //   GasCylinder(
+    //       gasId: '263417',
+    //       gasName: 'Oxygen',
+    //       gasType: GasType.OXYGENT,
+    //       dateRegistered: DateTime.now(),
+    //       location: "SUPPLIER",
+    //       registerStatus: RegisterStatus.REGISTERED,
+    //       gasContent: GasContent.EMPTY),
+    //   GasCylinder(
+    //       gasId: '374582',
+    //       gasName: 'Nitrogen',
+    //       gasType: GasType.NITROGEN,
+    //       dateRegistered: DateTime.now(),
+    //       location: "SUPPLIER",
+    //       registerStatus: RegisterStatus.REGISTERED,
+    //       gasContent: GasContent.EMPTY),
+    //   GasCylinder(
+    //       gasId: '481306',
+    //       gasName: 'Carbon',
+    //       gasType: GasType.CARBON,
+    //       dateRegistered: DateTime.now(),
+    //       location: "SUPPLIER",
+    //       registerStatus: RegisterStatus.REGISTERED,
+    //       gasContent: GasContent.EMPTY),
+    //   GasCylinder(
+    //       gasId: '192837',
+    //       gasName: 'Acetylene',
+    //       gasType: GasType.ACETYLENE,
+    //       dateRegistered: DateTime.now(),
+    //       location: "SUPPLIER",
+    //       registerStatus: RegisterStatus.REGISTERED,
+    //       gasContent: GasContent.EMPTY),
+    //   GasCylinder(
+    //       gasId: '284756',
+    //       gasName: 'Oxygen',
+    //       gasType: GasType.OXYGENT,
+    //       dateRegistered: DateTime.now(),
+    //       location: "SUPPLIER",
+    //       registerStatus: RegisterStatus.REGISTERED,
+    //       gasContent: GasContent.EMPTY),
+    //   GasCylinder(
+    //       gasId: '375648',
+    //       gasName: 'Nitrogen',
+    //       gasType: GasType.NITROGEN,
+    //       dateRegistered: DateTime.now(),
+    //       location: "SUPPLIER",
+    //       registerStatus: RegisterStatus.REGISTERED,
+    //       gasContent: GasContent.EMPTY),
+    //   GasCylinder(
+    //       gasId: '493827',
+    //       gasName: 'Carbon',
+    //       gasType: GasType.CARBON,
+    //       dateRegistered: DateTime.now(),
+    //       location: "SUPPLIER",
+    //       registerStatus: RegisterStatus.REGISTERED,
+    //       gasContent: GasContent.EMPTY),
+    //   GasCylinder(
+    //       gasId: '564738',
+    //       gasName: 'Acetylene',
+    //       gasType: GasType.ACETYLENE,
+    //       dateRegistered: DateTime.now(),
+    //       location: "SUPPLIER",
+    //       registerStatus: RegisterStatus.REGISTERED,
+    //       gasContent: GasContent.EMPTY),
+    //   GasCylinder(
+    //       gasId: '687495',
+    //       gasName: 'Oxygen',
+    //       gasType: GasType.OXYGENT,
+    //       dateRegistered: DateTime.now(),
+    //       location: "SUPPLIER",
+    //       registerStatus: RegisterStatus.REGISTERED,
+    //       gasContent: GasContent.EMPTY),
   ];
 
   List<GasCylinder> _filteredCylinderList = [];
@@ -135,6 +150,7 @@ class DataController extends ChangeNotifier {
 
   addToCylinderRegister(GasCylinder cyl) async {
     _cylinderList.add(cyl);
+    await MongoDatabase.registerCylinder(cyl);
 
     notifyListeners();
   }
@@ -144,9 +160,9 @@ class DataController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void searchCylinder(String keyword) {
-    //sort raw data
-    _cylinderList.sort((a, b) => a.gasId.compareTo(b.gasId));
+  void searchCylinder(String keyword) async {
+    //sort raw data if using sample from offline list
+    // _cylinderList.sort((a, b) => a.gasId.compareTo(b.gasId));
 
     //if any string inserted, then create and fill filteredcylinderlist with some filter from raw data
     if (keyword.isNotEmpty) {

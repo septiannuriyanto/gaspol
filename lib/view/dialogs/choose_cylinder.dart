@@ -114,12 +114,13 @@ class _ChooseCylinderDialogState extends State<ChooseCylinderDialog> {
                         gasType: gastype[_value!],
                         dateRegistered: DateTime.now(),
                         location: "SUPPLIER",
-                        registerStatus: RegisterStatus.PENDING);
+                        registerStatus: RegisterStatus.PENDING,
+                        gasContent: GasContent.FILLED);
                     setState(() {
                       isLoading = true;
                     });
                     await _dataController.addToCylinderRegister(newGasCyl);
-                    await Future.delayed(const Duration(seconds: 3), () {
+                    await Future.delayed(const Duration(seconds: 0), () {
                       setState(() {
                         isLoading = false;
                         _dataController.searchCylinder(widget.cylnumber);

@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import 'view/screens/home_screen/home_screen.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env.development');
   print(dotenv.env['DB_COLLECTION']);
   await MongoDatabase.connect();
