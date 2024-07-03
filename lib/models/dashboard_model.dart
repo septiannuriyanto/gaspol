@@ -1,7 +1,7 @@
 class DashboardModel {
   String location;
-  List<int> filledQty;
-  List<int> emptyQty;
+  List<dynamic> filledQty;
+  List<dynamic> emptyQty;
 
   DashboardModel({
     required this.location,

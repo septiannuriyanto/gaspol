@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-class ReceivingScreenController extends ChangeNotifier {
-  String _poNumber = 'Input PO Number';
-  String get poNumber => _poNumber;
+class IssuingScreenController extends ChangeNotifier {
+  String _wrNumber = 'Input WR Number';
+  String get wrNumber => _wrNumber;
 
   DateTime? _dateReceived;
   DateTime? get dateReceived => _dateReceived;
@@ -21,7 +21,7 @@ class ReceivingScreenController extends ChangeNotifier {
   }
 
   void changePONumber(String poNumber) {
-    _poNumber = poNumber;
+    _wrNumber = poNumber;
     notifyListeners();
   }
 

@@ -1,7 +1,7 @@
 import 'dart:developer';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:gaspol/controller/data/data_controller.dart';
+import 'package:gaspol/controller/data/receiving_data_controller.dart';
 import 'package:gaspol/models/gas_cylinder.dart';
 import 'package:gaspol/models/transaction_model.dart';
 import 'package:mongo_dart/mongo_dart.dart';
@@ -18,8 +18,16 @@ class MongoDatabase {
   static Future<void> connect() async {
     try {
       db = await Db.create(dotenv.env['DB_URL']!);
+      // while (db!.state == ConnectionState.active) {
+      //   await Future.delayed(Duration(milliseconds: 100));
+      // }
+      // if (db!.isConnected) return;
+      // await db!.close();
+      // await db!.open();
+      // return;
+
       if (db!.isConnected) await db!.close();
-      await db!.open();
+      await db!.open(secure: true);
       inspect(db);
       var status = await db!.serverStatus();
       print(status);
@@ -144,7 +152,6 @@ class MongoDatabase {
       }
 
       //check
-      print('----------------------------------------------');
       result = {
         "location": location,
         "filled": [
@@ -164,60 +171,6 @@ class MongoDatabase {
       print(e);
     }
     return result;
-  }
-
-  static Future<List<List<Map<String, dynamic>>>>
-      getEmptyGasCountAllTypeByLocation() async {
-    List<List<Map<String, dynamic>>> allGasAggregate = [];
-    final acetylenePipeline = AggregationPipelineBuilder()
-        .addStage(Match(where
-            .eq('gas_type', 'ACETYLENE')
-            .and(where.eq('gas_content', 'FILLED'))
-            .map['\$query']))
-        .addStage(Group(id: Field('location'), fields: {'total': Sum(1)}))
-        .build();
-    final nitrogenPipeline = AggregationPipelineBuilder()
-        .addStage(Match(where
-            .eq('gas_type', 'NITROGEN')
-            .and(where.eq('gas_content', 'FILLED'))
-            .map['\$query']))
-        .addStage(Group(id: Field('location'), fields: {'total': Sum(1)}))
-        .build();
-    final oxygentPipeline = AggregationPipelineBuilder()
-        .addStage(Match(where
-            .eq('gas_type', 'OXYGENT')
-            .and(where.eq('gas_content', 'FILLED'))
-            .map['\$query']))
-        .addStage(Group(id: Field('location'), fields: {'total': Sum(1)}))
-        .build();
-    final carbonPipeline = AggregationPipelineBuilder()
-        .addStage(Match(where
-            .eq('gas_type', 'CARBON')
-            .and(where.eq('gas_content', 'FILLED'))
-            .map['\$query']))
-        .addStage(Group(id: Field('location'), fields: {'total': Sum(1)}))
-        .build();
-
-    try {
-      final acetyleneAggregate =
-          await cylStock.modernAggregate(acetylenePipeline).toList();
-      final nitrogenAggregate =
-          await cylStock.modernAggregate(nitrogenPipeline).toList();
-      final oxygentAggregate =
-          await cylStock.modernAggregate(oxygentPipeline).toList();
-      final carbonAggregate =
-          await cylStock.modernAggregate(carbonPipeline).toList();
-
-      allGasAggregate = [
-        acetyleneAggregate,
-        nitrogenAggregate,
-        oxygentAggregate,
-        carbonAggregate
-      ];
-    } catch (e) {
-      print(e);
-    }
-    return allGasAggregate;
   }
 
   static Future<void> getGasCount(GasType gastype, String location) async {
@@ -250,6 +203,23 @@ class MongoDatabase {
     }
   }
 
+  static Future<void> approvePendingRegistration(String gasId) async {
+    try {
+      await cylStock.update(where.eq('gas_id', gasId),
+          ModifierBuilder().set('register_status', 'REGISTERED'));
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  static Future<void> deletePendingRegistration(String gasId) async {
+    try {
+      await cylStock.deleteOne({"gas_id": gasId});
+    } catch (e) {
+      print(e);
+    }
+  }
+
   static Future<void> dbOpen() async {
     try {
       await db!.open();
@@ -273,6 +243,21 @@ class MongoDatabase {
         'register_status': 'REGISTERED',
         'gas_content': 'FILLED',
         'location': 'SUPPLIER'
+      }).forEach((element) {
+        _cyls.add(GasCylinder.fromMap(element));
+      });
+    } catch (e) {
+      print(e);
+    }
+
+    return _cyls;
+  }
+
+  static Future<List<GasCylinder>> fetchUnregisteredCylinderList() async {
+    List<GasCylinder> _cyls = [];
+    try {
+      await cylStock.find({
+        'register_status': 'PENDING',
       }).forEach((element) {
         _cyls.add(GasCylinder.fromMap(element));
       });

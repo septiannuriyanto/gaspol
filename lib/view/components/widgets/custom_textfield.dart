@@ -16,6 +16,7 @@ class CustomTextField extends StatelessWidget {
   bool? autoFocus;
   List<TextInputFormatter>? inputFormatters;
   TextCapitalization? textCapitalization;
+  bool? obscureText;
 
   CustomTextField({
     this.onChanged,
@@ -31,11 +32,13 @@ class CustomTextField extends StatelessWidget {
     super.key,
     this.inputFormatters,
     this.textCapitalization,
+    this.obscureText,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      obscureText: obscureText ?? false,
       inputFormatters: [],
       textCapitalization: textCapitalization ?? TextCapitalization.none,
       autofocus: autoFocus ?? false,

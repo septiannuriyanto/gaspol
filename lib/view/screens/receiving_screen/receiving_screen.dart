@@ -1,6 +1,7 @@
 import 'package:dashed_stepper/dashed_stepper.dart';
 import 'package:flutter/material.dart';
-import 'package:gaspol/controller/data/data_controller.dart';
+import 'package:gaspol/controller/data/issuing_data_controller.dart';
+import 'package:gaspol/controller/data/receiving_data_controller.dart';
 import 'package:gaspol/controller/receiving_screen_controller.dart';
 import 'package:gaspol/models/gas_cylinder.dart';
 import 'package:gaspol/view/components/atomic/widget_props.dart';

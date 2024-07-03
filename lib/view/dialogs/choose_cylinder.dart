@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gaspol/controller/data/data_controller.dart';
+import 'package:gaspol/controller/data/receiving_data_controller.dart';
 import 'package:gaspol/models/gas_cylinder.dart';
 import 'package:gaspol/view/components/atomic/widget_props.dart';
 import 'package:gaspol/view/components/themes/colors.dart';

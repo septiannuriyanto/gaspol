@@ -27,19 +27,25 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     PageNumController _page = Provider.of(context);
-
+    DashboardScreenController _dbController =
+        Provider.of<DashboardScreenController>(context);
     return Scaffold(
       backgroundColor: MainColor.getColor(0),
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: MainColor.brandColor,
+        backgroundColor: Colors.white,
         foregroundColor: Colors.black,
-        title: Image.asset(
-          'lib/assets/image/gas-cylinder.png',
-          height: 30,
-          width: 30,
-        ),
+        iconTheme: IconThemeData(color: MainColor.brandColor),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.refresh_rounded),
+            onPressed: () {
+              _dbController.loadData();
+            },
+          )
+        ],
       ),
+      drawer: Drawer(),
       body: childWidget[_page.pagenumber],
       bottomNavigationBar: CurvedNavigationBar(
         key: _bottomNavigationKey,
