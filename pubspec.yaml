@@ -44,6 +44,8 @@ dependencies:
   quickalert: ^1.1.0
   mongo_dart: ^0.10.3
   flutter_dotenv: ^5.1.0
+  timer_controller: ^1.0.0
+  custom_timer: ^0.2.3
 
 
 dev_dependencies:
@@ -91,9 +93,17 @@ flutter:
   assets:
     - lib/assets/image/gas-cylinder.png
     - lib/assets/image/oxygent.png
+    - lib/assets/image/oxygent-empty.png
+    - lib/assets/image/oxygent-empty-white.png
     - lib/assets/image/acetylene.png
+    - lib/assets/image/acetylene-empty.png
+    - lib/assets/image/acetylene-empty-white.png
     - lib/assets/image/nitrogen.png
+    - lib/assets/image/nitrogen-empty.png
+    - lib/assets/image/nitrogen-empty-white.png
     - lib/assets/image/carbon.png
+    - lib/assets/image/carbon-empty.png
+    - lib/assets/image/carbon-empty-white.png
     - .env.development
     - .env.production
 

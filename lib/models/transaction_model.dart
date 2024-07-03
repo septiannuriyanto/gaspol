@@ -2,33 +2,43 @@ import 'package:gaspol/models/gas_cylinder.dart';
 
 class GasTransaction {
   DateTime transDate;
-  String cylNumber;
-  GasType gasType;
-  String documentType;
   String documentNumber;
   String from;
   String to;
   TransactionCategory transactionCategory;
-  int qty;
   String delegator;
   String receiver;
+  List<GasCylinder>? gasCylinder;
 
   GasTransaction({
     required this.transDate,
-    required this.cylNumber,
-    required this.gasType,
     required this.from,
     required this.to,
     required this.transactionCategory,
-    required this.qty,
     required this.delegator,
     required this.receiver,
     required this.documentNumber,
-    required this.documentType,
+    this.gasCylinder,
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'transaction_date': transDate,
+      'doc_num': documentNumber,
+      'tx_category': transactionCategory.name,
+      'from': from,
+      'to': to,
+      'delegator': delegator,
+      'receiver': receiver,
+      'cylinders': gasCylinder!.map((e) {
+        return e.gasId;
+      }).toList()
+    };
+  }
 }
 
 enum TransactionCategory {
   INCOMING,
   OUTGOING,
+  TRANSFER,
 }

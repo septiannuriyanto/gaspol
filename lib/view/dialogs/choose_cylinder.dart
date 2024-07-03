@@ -123,7 +123,7 @@ class _ChooseCylinderDialogState extends State<ChooseCylinderDialog> {
                     await Future.delayed(const Duration(seconds: 0), () {
                       setState(() {
                         isLoading = false;
-                        _dataController.searchCylinder(widget.cylnumber);
+                        _dataController.searchCylinder();
                       });
                     });
 

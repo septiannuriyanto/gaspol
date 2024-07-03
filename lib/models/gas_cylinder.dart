@@ -27,7 +27,7 @@ class GasCylinder {
   String gasId;
   String gasName;
   DateTime dateRegistered;
-  String registor = "User";
+  String? registor;
   String location;
   RegisterStatus registerStatus;
   GasContent gasContent;
@@ -40,6 +40,7 @@ class GasCylinder {
     required this.location,
     required this.registerStatus,
     required this.gasContent,
+    this.registor,
   });
 
   Map<String, dynamic> toMap() {
@@ -55,17 +56,18 @@ class GasCylinder {
     };
   }
 
-  factory GasCylinder.fromMap(Map<String, dynamic> map) {
+  factory GasCylinder.fromMap(Map<String, dynamic> mapOfCyl) {
     return GasCylinder(
-      gasId: map['gas_id'],
-      gasName: map['gas_name'],
-      gasType: GasType.values.firstWhere((e) => e.name == map['gas_type']),
-      dateRegistered: DateTime.parse(map['date_registered'].toString()),
-      location: map['location'],
+      gasType: GasType.values.firstWhere((e) => e.name == mapOfCyl['gas_type']),
+      gasId: mapOfCyl['gas_id'],
+      gasName: mapOfCyl['gas_name'],
+      dateRegistered: DateTime.parse(mapOfCyl['date_registered'].toString()),
+      registor: mapOfCyl['registor'],
+      location: mapOfCyl['location'],
       registerStatus: RegisterStatus.values
-          .firstWhere((e) => e.name == map['register_status']),
-      gasContent:
-          GasContent.values.firstWhere((e) => e.name == map['gas_content']),
+          .firstWhere((e) => e.name == mapOfCyl['register_status']),
+      gasContent: GasContent.values
+          .firstWhere((e) => e.name == mapOfCyl['gas_content']),
     );
   }
 }

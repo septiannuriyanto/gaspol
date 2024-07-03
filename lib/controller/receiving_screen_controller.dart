@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gaspol/controller/data/data_controller.dart';
+import 'package:gaspol/models/gas_cylinder.dart';
 import 'package:gaspol/view/utils/datetime_formatter.dart';
 
 class ReceivingScreenController extends ChangeNotifier {
@@ -15,7 +17,6 @@ class ReceivingScreenController extends ChangeNotifier {
   int get stepper => _stepper;
 
   void changeDate(DateTime date) {
-    _dateReceived = date;
     _dateReceived = date;
     notifyListeners();
   }
