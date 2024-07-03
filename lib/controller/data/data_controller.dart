@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gaspol/controller/data/mongodb_controller.dart';
+import 'package:gaspol/models/dashboard_model.dart';
 import 'package:gaspol/models/gas_cylinder.dart';
 import 'package:gaspol/models/transaction_model.dart';
 
@@ -21,6 +22,8 @@ enum AutoCompleteType {
 enum ProcessType { RECEIVING, RETURNING, CHECKOUT }
 
 enum SearchResult { EXACT, PARTIAL, NOTFOUND }
+
+List<String> Locations = ["SUPPLIER", "SM", "WHEEL", "TRACK", "SSE"];
 
 class DataController extends ChangeNotifier {
   List<GasCylinder> _cylinderList = [];
@@ -75,7 +78,18 @@ class DataController extends ChangeNotifier {
   }
 
   searchCylinder() async {
-    print(processType);
+    // await MongoDatabase.getLocationAggregate();
+    List<Map<String, dynamic>> stockStatus = [];
+
+    for (var element in Location) {
+      stockStatus
+          .add(await MongoDatabase.getFilledGasCountAllTypeByLocation(element));
+    }
+
+    stockStatus.forEach(print);
+
+    print('===================================================');
+
     //sort raw data if using sample from offline list
     // _cylinderList.sort((a, b) => a.gasId.compareTo(b.gasId));
 

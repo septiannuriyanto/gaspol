@@ -1,5 +1,6 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:gaspol/controller/home_screen_controller.dart';
 import 'package:gaspol/controller/page_controller.dart';
 import 'package:gaspol/controller/switches_controller.dart';
 import 'package:gaspol/view/components/atomic/widget_props.dart';

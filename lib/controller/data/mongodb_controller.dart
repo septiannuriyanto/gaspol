@@ -36,6 +36,208 @@ class MongoDatabase {
     }
   }
 
+  static Future<void> getGasCountAllType() async {
+    final pipeline = AggregationPipelineBuilder()
+        .addStage(Group(id: Field('gas_type'), fields: {'count': Sum(1)}))
+        .build();
+    try {
+      final res = await cylStock.modernAggregate(pipeline).toList();
+      res.forEach(print);
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  static getLocationAggregate() async {
+    List<String> locs = [];
+    final locationPipeline = AggregationPipelineBuilder()
+        .addStage(Group(id: Field('location')))
+        .build();
+
+    try {
+      final res = await cylStock.modernAggregate(locationPipeline).toList();
+      print(res);
+      for (var element in res) {
+        locs.add(element["_id"]);
+      }
+
+      print(locs);
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  static Future<Map<String, dynamic>> getFilledGasCountAllTypeByLocation(
+      String location) async {
+    Map<String, dynamic> result = {};
+    final filledPipeline = AggregationPipelineBuilder()
+        .addStage(Match(where
+            .eq('location', location)
+            .and(where.eq('gas_content', 'FILLED'))
+            .map['\$query']))
+        .addStage(Group(id: Field('gas_type'), fields: {'total': Sum(1)}))
+        .build();
+
+    final emptyPipeline = AggregationPipelineBuilder()
+        .addStage(Match(where
+            .eq('location', location)
+            .and(where.eq('gas_content', 'EMPTY'))
+            .map['\$query']))
+        .addStage(Group(id: Field('gas_type'), fields: {'total': Sum(1)}))
+        .build();
+    try {
+      final filledRes = await cylStock.modernAggregate(filledPipeline).toList();
+      final emptyRes = await cylStock.modernAggregate(emptyPipeline).toList();
+
+      //Normalization
+      List<String> availablegas = [];
+      List<String> unavailablegas = [];
+      Map<dynamic, dynamic> filledGas = {};
+      Map<dynamic, dynamic> emptyGas = {};
+
+      //TAKE CARE OF FILLED ELEMENTS
+      for (var element in filledRes) {
+        availablegas.add(element["_id"]);
+      }
+
+      for (var element in GasType.values) {
+        if (!availablegas.contains(element.name)) {
+          unavailablegas.add(element.name);
+        }
+      }
+
+      if (unavailablegas.isNotEmpty) {
+        for (var element in unavailablegas) {
+          filledRes.add({"_id": element, "total": 0});
+        }
+      }
+
+      for (var element in filledRes) {
+        var entry = {element["_id"]: element["total"]};
+        filledGas.addEntries(entry.entries);
+      }
+
+      //RESET
+      availablegas.clear();
+      unavailablegas.clear();
+
+      //TAKE CARE OF EMPTY ELEMENTS
+      for (var element in emptyRes) {
+        availablegas.add(element["_id"]);
+      }
+
+      for (var element in GasType.values) {
+        if (!availablegas.contains(element.name)) {
+          unavailablegas.add(element.name);
+        }
+      }
+
+      if (unavailablegas.isNotEmpty) {
+        for (var element in unavailablegas) {
+          emptyRes.add({"_id": element, "total": 0});
+        }
+      }
+
+      for (var element in emptyRes) {
+        var entry = {element["_id"]: element["total"]};
+        emptyGas.addEntries(entry.entries);
+      }
+
+      //check
+      print('----------------------------------------------');
+      result = {
+        "location": location,
+        "filled": [
+          filledGas["ACETYLENE"],
+          filledGas["NITROGEN"],
+          filledGas["OXYGENT"],
+          filledGas["CARBON"]
+        ],
+        "empty": [
+          emptyGas["ACETYLENE"],
+          emptyGas["NITROGEN"],
+          emptyGas["OXYGENT"],
+          emptyGas["CARBON"]
+        ]
+      };
+    } catch (e) {
+      print(e);
+    }
+    return result;
+  }
+
+  static Future<List<List<Map<String, dynamic>>>>
+      getEmptyGasCountAllTypeByLocation() async {
+    List<List<Map<String, dynamic>>> allGasAggregate = [];
+    final acetylenePipeline = AggregationPipelineBuilder()
+        .addStage(Match(where
+            .eq('gas_type', 'ACETYLENE')
+            .and(where.eq('gas_content', 'FILLED'))
+            .map['\$query']))
+        .addStage(Group(id: Field('location'), fields: {'total': Sum(1)}))
+        .build();
+    final nitrogenPipeline = AggregationPipelineBuilder()
+        .addStage(Match(where
+            .eq('gas_type', 'NITROGEN')
+            .and(where.eq('gas_content', 'FILLED'))
+            .map['\$query']))
+        .addStage(Group(id: Field('location'), fields: {'total': Sum(1)}))
+        .build();
+    final oxygentPipeline = AggregationPipelineBuilder()
+        .addStage(Match(where
+            .eq('gas_type', 'OXYGENT')
+            .and(where.eq('gas_content', 'FILLED'))
+            .map['\$query']))
+        .addStage(Group(id: Field('location'), fields: {'total': Sum(1)}))
+        .build();
+    final carbonPipeline = AggregationPipelineBuilder()
+        .addStage(Match(where
+            .eq('gas_type', 'CARBON')
+            .and(where.eq('gas_content', 'FILLED'))
+            .map['\$query']))
+        .addStage(Group(id: Field('location'), fields: {'total': Sum(1)}))
+        .build();
+
+    try {
+      final acetyleneAggregate =
+          await cylStock.modernAggregate(acetylenePipeline).toList();
+      final nitrogenAggregate =
+          await cylStock.modernAggregate(nitrogenPipeline).toList();
+      final oxygentAggregate =
+          await cylStock.modernAggregate(oxygentPipeline).toList();
+      final carbonAggregate =
+          await cylStock.modernAggregate(carbonPipeline).toList();
+
+      allGasAggregate = [
+        acetyleneAggregate,
+        nitrogenAggregate,
+        oxygentAggregate,
+        carbonAggregate
+      ];
+    } catch (e) {
+      print(e);
+    }
+    return allGasAggregate;
+  }
+
+  static Future<void> getGasCount(GasType gastype, String location) async {
+    final pipeline = AggregationPipelineBuilder()
+        .addStage(
+          Match(where
+              .eq('gas_type', gastype.name)
+              .and(where.eq('location', location))
+              .map['\$query']),
+        )
+        .addStage(Group(id: Field('gas_type'), fields: {'count': Sum(1)}))
+        .build();
+    try {
+      final res = await cylStock.modernAggregate(pipeline).toList();
+      res.forEach(print);
+    } catch (e) {
+      print(e);
+    }
+  }
+
   static Future<void> transactionProcess(GasTransaction transaction) async {
     try {
       await cylTrans.insert(transaction.toMap());

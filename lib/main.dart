@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:gaspol/controller/data/data_controller.dart';
 import 'package:gaspol/controller/data/mongodb_controller.dart';
+import 'package:gaspol/controller/home_screen_controller.dart';
 import 'package:gaspol/controller/page_controller.dart';
 import 'package:gaspol/controller/receiving_screen_controller.dart';
 import 'package:gaspol/controller/switches_controller.dart';
@@ -18,6 +19,7 @@ void main() async {
     providers: [
       ChangeNotifierProvider(create: (_) => PageNumController()),
       ChangeNotifierProvider(create: (_) => SwitchesController()),
+      ChangeNotifierProvider(create: (_) => DashboardScreenController()),
       ChangeNotifierProvider(create: (_) => ReceivingScreenController()),
       ChangeNotifierProvider(create: (_) => DataController()),
     ],

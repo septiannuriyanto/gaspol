@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:gaspol/controller/home_screen_controller.dart';
 import 'package:gaspol/controller/switches_controller.dart';
 import 'package:gaspol/view/components/themes/colors.dart';
 import 'package:gaspol/view/components/themes/layouts.dart';
+import 'package:gaspol/view/utils/datetime_formatter.dart';
 import 'package:provider/provider.dart';
 
 import '../../components/atomic/widget_props.dart';
@@ -14,6 +16,8 @@ class StockScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     SwitchesController _switch = Provider.of<SwitchesController>(context);
+    DashboardScreenController _dbController =
+        Provider.of<DashboardScreenController>(context);
     return SingleChildScrollView(
       child: Padding(
         padding: EdgeInsets.all(kDefaultPadding),
@@ -25,7 +29,7 @@ class StockScreen extends StatelessWidget {
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             Text(
-              "Hari ini : Senin, 24 Juni 2024",
+              "Hari ini : ${todayInd}",
               style: TextStyle(color: Colors.grey),
             ),
             SizedBox(
