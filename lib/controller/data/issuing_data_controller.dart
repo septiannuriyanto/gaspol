@@ -1,26 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:gaspol/controller/data/constants.dart';
 import 'package:gaspol/controller/data/mongodb_controller.dart';
 import 'package:gaspol/models/gas_cylinder.dart';
 import 'package:gaspol/models/transaction_model.dart';
-
-enum KeywordFoundStatus {
-  FOUND_ON_BOTH,
-  FOUND_ON_RECEIVED,
-  FOUND_ON_STOCK,
-  NOT_FOUND_ON_BOTH
-}
-
-enum AutoCompleteType {
-  ADD_ITEM,
-  DISPLAY_LIST,
-  DISPLAY_NULL_LIST,
-  WAITING,
-  DISPLAY_PARTIAL_LIST
-}
-
-enum ProcessType { RECEIVING, RETURNING, CHECKOUT }
-
-enum SearchResult { EXACT, PARTIAL, NOTFOUND }
 
 class IssuingDataController extends ChangeNotifier {
   List<GasCylinder> _cylinderList = [];
@@ -45,8 +27,8 @@ class IssuingDataController extends ChangeNotifier {
   bool _isAvailable = false;
   bool get isAvailable => _isAvailable;
 
-  String _poNumber = '';
-  String get poNumber => _poNumber;
+  String _wrNumber = '';
+  String get wrNumber => _wrNumber;
 
   AutoCompleteType _autoCompleteType = AutoCompleteType.WAITING;
   AutoCompleteType get autoCompleteType => _autoCompleteType;
@@ -74,7 +56,7 @@ class IssuingDataController extends ChangeNotifier {
     notifyListeners();
   }
 
-  searchCylinder() async {
+  searchCylinder(String source) async {
     // await MongoDatabase.getLocationAggregate();
 
     //sort raw data if using sample from offline list
@@ -84,9 +66,9 @@ class IssuingDataController extends ChangeNotifier {
     _cylinderList.clear();
     // _cylinderList = await MongoDatabase.fetchAllCylinderList();
     if (_processType == ProcessType.RECEIVING) {
-      _cylinderList = await MongoDatabase.fetchAllCylinderList();
+      _cylinderList = await MongoDatabase.fetchEmptyCylinderList(source);
     } else {
-      _cylinderList = await MongoDatabase.fetchEmptyCylinderList();
+      _cylinderList = await MongoDatabase.fetchAllCylinderList("SM");
     }
 
     if (_cylinderNumber.isNotEmpty) {
@@ -214,32 +196,51 @@ class IssuingDataController extends ChangeNotifier {
     notifyListeners();
   }
 
-  checkoutReceiving(String poNumber, DateTime dt) async {
+  checkoutIssuing(
+      String wrNumber, DateTime dt, String destination, String pic) async {
     GasTransaction txTransaction = GasTransaction(
       transDate: dt,
       from: 'SM',
-      to: 'SUPPLIER',
-      transactionCategory: TransactionCategory.OUTGOING,
+      to: destination,
+      transactionCategory: TransactionCategory.TRANSFER,
       delegator: 'WAREHOUSE CREW',
-      receiver: 'DRIVER SUPPLIER',
-      documentNumber: poNumber,
+      receiver: pic,
+      documentNumber: wrNumber,
       gasCylinder: _cylinderToReturn,
     );
 
     GasTransaction rxTransaction = GasTransaction(
       transDate: dt,
-      from: 'SUPPLIER',
+      from: destination,
       to: 'SM',
-      transactionCategory: TransactionCategory.INCOMING,
-      delegator: 'DRIVER SUPPLIER',
+      transactionCategory: TransactionCategory.TRANSFER,
+      delegator: pic,
       receiver: 'WAREHOUSE CREW',
-      documentNumber: poNumber,
+      documentNumber: wrNumber,
       gasCylinder: cylinderToReceive,
     );
 
     await MongoDatabase.transactionProcess(txTransaction);
     await MongoDatabase.transactionProcess(rxTransaction);
+
+    _processType = ProcessType.DONE;
+
+    notifyListeners();
   }
 
-  resetAllReceivingStates() {}
+  resetAllIssuingStates() {
+    _wrNumber = '';
+    _cylinderList.clear();
+    _cylinderToReceive.clear();
+    _cylinderToReturn.clear();
+    _filteredCylinderList.clear();
+    _filteredcylinderLength = 0;
+    _processType = ProcessType.RETURNING;
+    _keywordFoundStatus = KeywordFoundStatus.NOT_FOUND_ON_BOTH;
+    _isAvailable = false;
+    _autoCompleteType = AutoCompleteType.WAITING;
+    _searchResult = SearchResult.NOTFOUND;
+
+    notifyListeners();
+  }
 }

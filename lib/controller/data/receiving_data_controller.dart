@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gaspol/controller/data/constants.dart';
 import 'package:gaspol/controller/data/issuing_data_controller.dart';
 import 'package:gaspol/controller/data/mongodb_controller.dart';
 import 'package:gaspol/models/gas_cylinder.dart';
@@ -66,9 +67,9 @@ class DataController extends ChangeNotifier {
     _cylinderList.clear();
     // _cylinderList = await MongoDatabase.fetchAllCylinderList();
     if (_processType == ProcessType.RECEIVING) {
-      _cylinderList = await MongoDatabase.fetchAllCylinderList();
+      _cylinderList = await MongoDatabase.fetchAllCylinderList("SUPPLIER");
     } else {
-      _cylinderList = await MongoDatabase.fetchEmptyCylinderList();
+      _cylinderList = await MongoDatabase.fetchEmptyCylinderList("SM");
     }
 
     if (_cylinderNumber.isNotEmpty) {
@@ -221,7 +222,25 @@ class DataController extends ChangeNotifier {
 
     await MongoDatabase.transactionProcess(txTransaction);
     await MongoDatabase.transactionProcess(rxTransaction);
+
+    _processType = ProcessType.DONE;
+
+    notifyListeners();
   }
 
-  resetAllReceivingStates() {}
+  resetAllReceivingStates() {
+    _poNumber = '';
+    _cylinderList.clear();
+    _cylinderToReceive.clear();
+    _cylinderToReturn.clear();
+    _filteredCylinderList.clear();
+    _filteredcylinderLength = 0;
+    _processType = ProcessType.RETURNING;
+    _keywordFoundStatus = KeywordFoundStatus.NOT_FOUND_ON_BOTH;
+    _isAvailable = false;
+    _autoCompleteType = AutoCompleteType.WAITING;
+    _searchResult = SearchResult.NOTFOUND;
+
+    notifyListeners();
+  }
 }

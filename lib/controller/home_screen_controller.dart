@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:gaspol/controller/data/constants.dart';
 import 'package:gaspol/controller/data/mongodb_controller.dart';
 import 'package:gaspol/models/dashboard_model.dart';
 import 'package:gaspol/models/gas_cylinder.dart';
@@ -15,14 +16,13 @@ class DashboardScreenController extends ChangeNotifier {
   List<GasCylinder> _unregisteredCylinder = [];
   List<GasCylinder> get unregisteredCylinder => _unregisteredCylinder;
 
-  List<String> Locations = ["SUPPLIER", "SM", "WHEEL", "TRACK", "SSE"];
-
   void changeDashboardMode(DashboardMode dm) {
     _dashboardMode = dm;
     notifyListeners();
   }
 
   void loadData() async {
+    _stockStatus.clear();
     await Future.delayed(const Duration(seconds: 2));
     for (var element in Locations) {
       _stockStatus.add(DashboardModel.fromObjectMap(

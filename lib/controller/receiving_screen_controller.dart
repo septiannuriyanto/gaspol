@@ -10,7 +10,7 @@ class ReceivingScreenController extends ChangeNotifier {
   bool _isSet = false;
   bool get isSet => _isSet;
 
-  int _stepper = 0;
+  int _stepper = 1;
   int get stepper => _stepper;
 
   final dateController = TextEditingController();
@@ -33,6 +33,15 @@ class ReceivingScreenController extends ChangeNotifier {
 
   void addStepper() {
     _stepper++;
+    notifyListeners();
+  }
+
+  void resetUIReceivingStates() {
+    _poNumber = 'Input WR Number';
+    _dateReceived = null;
+    _isSet = false;
+    _stepper = 1;
+
     notifyListeners();
   }
 

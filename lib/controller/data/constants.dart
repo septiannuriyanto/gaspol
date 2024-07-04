@@ -13,6 +13,8 @@ enum AutoCompleteType {
   DISPLAY_PARTIAL_LIST
 }
 
-enum ProcessType { RECEIVING, RETURNING, CHECKOUT }
+enum ProcessType { RECEIVING, RETURNING, CHECKOUT, DONE }
 
 enum SearchResult { EXACT, PARTIAL, NOTFOUND }
+
+List<String> Locations = ["SUPPLIER", "SM", "WHEEL", "TRACK", "SSE"];

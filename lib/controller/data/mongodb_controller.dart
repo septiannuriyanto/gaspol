@@ -78,6 +78,7 @@ class MongoDatabase {
   static Future<Map<String, dynamic>> getFilledGasCountAllTypeByLocation(
       String location) async {
     Map<String, dynamic> result = {};
+    result.clear();
     final filledPipeline = AggregationPipelineBuilder()
         .addStage(Match(where
             .eq('location', location)
@@ -195,8 +196,13 @@ class MongoDatabase {
     try {
       await cylTrans.insert(transaction.toMap());
       for (var element in transaction.gasCylinder!) {
-        await cylStock.update(where.eq('gas_id', element.gasId),
-            ModifierBuilder().set('location', transaction.to));
+        await cylStock.update(
+            where.eq('gas_id', element.gasId),
+            ModifierBuilder().set('location', transaction.to).set(
+                'gas_content',
+                transaction.transactionCategory == TransactionCategory.TRANSFER
+                    ? "EMPTY"
+                    : "FILLED"));
       }
     } catch (e) {
       print(e);
@@ -236,13 +242,13 @@ class MongoDatabase {
     }
   }
 
-  static Future<List<GasCylinder>> fetchAllCylinderList() async {
+  static Future<List<GasCylinder>> fetchAllCylinderList(String source) async {
     List<GasCylinder> _cyls = [];
     try {
       await cylStock.find({
         'register_status': 'REGISTERED',
         'gas_content': 'FILLED',
-        'location': 'SUPPLIER'
+        'location': source
       }).forEach((element) {
         _cyls.add(GasCylinder.fromMap(element));
       });
@@ -268,7 +274,22 @@ class MongoDatabase {
     return _cyls;
   }
 
-  static Future<List<GasCylinder>> fetchEmptyCylinderList() async {
+  static Future<int> checkCylinderRegistration(String gasId) async {
+    List<GasCylinder> _cyls = [];
+    try {
+      await cylStock.find({
+        'gas_id': gasId,
+      }).forEach((element) {
+        _cyls.add(GasCylinder.fromMap(element));
+      });
+    } catch (e) {
+      print(e);
+    }
+
+    return _cyls.length;
+  }
+
+  static Future<List<GasCylinder>> fetchEmptyCylinderList(String source) async {
     final DbCollection cylStock =
         db!.collection(dotenv.env['DB_STOCK_COLLECTION']!);
     List<GasCylinder> _cyls = [];
@@ -276,7 +297,7 @@ class MongoDatabase {
       await cylStock.find({
         'register_status': 'REGISTERED',
         'gas_content': 'EMPTY',
-        'location': 'SM'
+        'location': source
       }).forEach((element) {
         _cyls.add(GasCylinder.fromMap(element));
       });

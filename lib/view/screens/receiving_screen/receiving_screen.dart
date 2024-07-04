@@ -1,8 +1,9 @@
 import 'package:dashed_stepper/dashed_stepper.dart';
 import 'package:flutter/material.dart';
-import 'package:gaspol/controller/data/issuing_data_controller.dart';
+import 'package:gaspol/controller/data/constants.dart';
 import 'package:gaspol/controller/data/receiving_data_controller.dart';
 import 'package:gaspol/controller/receiving_screen_controller.dart';
+
 import 'package:gaspol/models/gas_cylinder.dart';
 import 'package:gaspol/view/components/atomic/widget_props.dart';
 import 'package:gaspol/view/components/themes/colors.dart';
@@ -18,7 +19,6 @@ import 'package:gaspol/view/dialogs/order_list_dialog.dart';
 import 'package:gaspol/view/utils/datetime_formatter.dart';
 import 'package:provider/provider.dart';
 import 'package:quickalert/quickalert.dart';
-
 import 'package:timer_controller/timer_controller.dart';
 
 class ReceivingScreen extends StatefulWidget {
@@ -34,17 +34,24 @@ class _ReceivingScreenState extends State<ReceivingScreen>
 
   final TimerController secondsTimer = TimerController.seconds(1);
 
+  ReceivingScreenController? _controller;
+  DataController? _dataController;
+
   @override
   void dispose() {
     secondsTimer.dispose();
     super.dispose();
   }
 
+  void resetAllReceivingStates() {
+    _dataController!.resetAllReceivingStates();
+    _controller!.resetUIReceivingStates();
+  }
+
   @override
   Widget build(BuildContext context) {
-    ReceivingScreenController _controller =
-        Provider.of<ReceivingScreenController>(context);
-    DataController _dataController = Provider.of<DataController>(context);
+    _controller = Provider.of<ReceivingScreenController>(context);
+    _dataController = Provider.of<DataController>(context);
     return Padding(
       padding: EdgeInsets.all(kDefaultPadding),
       child: Column(
@@ -57,12 +64,12 @@ class _ReceivingScreenState extends State<ReceivingScreen>
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: FakeTextField(
-                      readOnly: _controller.isSet,
+                      readOnly: _controller!.isSet,
                       prefixIcon: Icons.discount,
-                      iconColor: _controller.isSet == true
+                      iconColor: _controller!.isSet == true
                           ? Colors.grey
                           : MainColor.getColor(2),
-                      caption: _controller.poNumber,
+                      caption: _controller!.poNumber,
                       radius: 8,
                       borderColor: MainColor.getColor(2),
                       onPress: () async {
@@ -80,7 +87,7 @@ class _ReceivingScreenState extends State<ReceivingScreen>
 
                         if (data != null) {
                           print(data);
-                          _controller.changePONumber(data.toString());
+                          _controller!.changePONumber(data.toString());
                         }
                       },
                     ),
@@ -90,14 +97,14 @@ class _ReceivingScreenState extends State<ReceivingScreen>
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: FakeTextField(
-                      readOnly: _controller.isSet,
+                      readOnly: _controller!.isSet,
                       prefixIcon: Icons.calendar_month,
-                      iconColor: _controller.isSet == true
+                      iconColor: _controller!.isSet == true
                           ? Colors.grey
                           : MainColor.getColor(2),
-                      caption: _controller.dateReceived == null
+                      caption: _controller!.dateReceived == null
                           ? "Input Date"
-                          : convertToIndDate(_controller.dateReceived!),
+                          : convertToIndDate(_controller!.dateReceived!),
                       radius: 8,
                       borderColor: MainColor.getColor(2),
                       onPress: () async {
@@ -108,7 +115,7 @@ class _ReceivingScreenState extends State<ReceivingScreen>
                           lastDate: DateTime.now().add(const Duration(days: 3)),
                         );
                         if (date != null) {
-                          _controller.changeDate(date);
+                          _controller!.changeDate(date);
                         }
                       },
                     ),
@@ -119,7 +126,7 @@ class _ReceivingScreenState extends State<ReceivingScreen>
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                        color: _controller.isSet == true
+                        color: _controller!.isSet == true
                             ? Colors.grey
                             : MainColor.brandColor,
                         borderRadius: BorderRadius.all(Radius.circular(8))),
@@ -129,10 +136,11 @@ class _ReceivingScreenState extends State<ReceivingScreen>
                     ),
                   ),
                   onTap: () {
-                    bool validate = _controller.poNumber != "Input PO Number" &&
-                        _controller.dateReceived != null;
+                    bool validate =
+                        _controller!.poNumber != "Input PO Number" &&
+                            _controller!.dateReceived != null;
                     if (validate == true) {
-                      _controller.lockHeaderData();
+                      _controller!.lockHeaderData();
                     }
                   },
                 ),
@@ -142,54 +150,61 @@ class _ReceivingScreenState extends State<ReceivingScreen>
           vSpace(10),
           DashedStepper(
             indicatorColor: Colors.lightGreen,
-            length: 4,
-            step: _controller.stepper,
+            length: 5,
+            step: _controller!.stepper,
             labelStyle: const TextStyle(color: Colors.black),
             labels: const [
               'Input\nPO',
               'Receive\nFilled',
               'Issue\nEmpty',
-              'Check\nOut'
+              'Check\nOut',
+              'Done'
             ],
           ),
           vSpace(20),
-          _controller.stepper == 1
+          _controller!.stepper == 1
               ? Text(
-                  "Pilih Tabung untuk Diterima",
+                  "Input Data Order",
                   style: TextStyle(fontWeight: FontWeight.bold),
                 )
-              : _controller.stepper == 2
-                  ? Text("Pilih Tabung untuk Dikirim",
+              : _controller!.stepper == 2
+                  ? Text("Pilih Tabung untuk Diterima",
                       style: TextStyle(fontWeight: FontWeight.bold))
-                  : _controller.stepper == 3
-                      ? Column(
-                          children: [
-                            Text("Summary Order",
-                                style: TextStyle(fontWeight: FontWeight.bold)),
-                            vSpace(20)
-                          ],
-                        )
-                      : vSpace(0),
+                  : _controller!.stepper == 3
+                      ? Text("Pilih Tabung untuk Dikirim",
+                          style: TextStyle(fontWeight: FontWeight.bold))
+                      : _controller!.stepper == 4
+                          ? Column(
+                              children: [
+                                Text("Summary Order",
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold)),
+                                vSpace(20)
+                              ],
+                            )
+                          : Text("Order Complete",
+                              style: TextStyle(fontWeight: FontWeight.bold)),
           Visibility(
-            visible: _dataController.processType != ProcessType.CHECKOUT,
+            visible: _dataController!.processType != ProcessType.CHECKOUT &&
+                _dataController!.processType != ProcessType.DONE,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: TimerControllerListener(
                 listener: (context, value) {
                   if (value.status == TimerStatus.finished) {
-                    _dataController.searchCylinder();
+                    _dataController!.searchCylinder();
                   }
                 },
                 controller: secondsTimer,
                 child: CustomTextField(
                   textCapitalization: TextCapitalization.words,
                   txtController: txtCon,
-                  readonly: !_controller.isSet,
+                  readonly: !_controller!.isSet,
                   prefixIcon: Icon(Icons.search_sharp),
                   hint: "Search Cylinder Number",
                   onChanged: (p0) async {
-                    _dataController.setCylinderNumber(p0);
-                    _dataController
+                    _dataController!.setCylinderNumber(p0);
+                    _dataController!
                         .changeAutoCompleteState(AutoCompleteType.WAITING);
                     secondsTimer.restart();
                   },
@@ -197,7 +212,7 @@ class _ReceivingScreenState extends State<ReceivingScreen>
               ),
             ),
           ),
-          _dataController.processType == ProcessType.RECEIVING
+          _dataController!.processType == ProcessType.RECEIVING
               ?
 
               //LISTVIEW WIDGET FOR RECEIVING PROCESS
@@ -206,7 +221,7 @@ class _ReceivingScreenState extends State<ReceivingScreen>
                     child: Stack(
                       children: [
                         Column(
-                          children: _dataController.cylinderToReceive.map((e) {
+                          children: _dataController!.cylinderToReceive.map((e) {
                             return Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Container(
@@ -228,7 +243,7 @@ class _ReceivingScreenState extends State<ReceivingScreen>
                                     subtitle: Text(e.gasName),
                                     trailing: IconButton(
                                       onPressed: () {
-                                        _dataController
+                                        _dataController!
                                             .removeCylinderFromReceivingList(
                                                 e.gasId);
                                       },
@@ -242,7 +257,7 @@ class _ReceivingScreenState extends State<ReceivingScreen>
                           }).toList(),
                         ),
                         Visibility(
-                          visible: _dataController.cylinderNumber.isNotEmpty,
+                          visible: _dataController!.cylinderNumber.isNotEmpty,
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 8),
                             child: Container(
@@ -253,12 +268,12 @@ class _ReceivingScreenState extends State<ReceivingScreen>
                                   color: Colors.white,
                                   borderRadius: kDefaultBorderRadiusAll),
                               width: getW(context),
-                              height: (_dataController.autoCompleteType ==
+                              height: (_dataController!.autoCompleteType ==
                                           AutoCompleteType.ADD_ITEM) ||
-                                      (_dataController.autoCompleteType ==
+                                      (_dataController!.autoCompleteType ==
                                           AutoCompleteType.WAITING)
                                   ? 86
-                                  : _dataController.autoCompleteType ==
+                                  : _dataController!.autoCompleteType ==
                                           AutoCompleteType.DISPLAY_LIST
                                       ? 256
                                       : 0,
@@ -267,9 +282,9 @@ class _ReceivingScreenState extends State<ReceivingScreen>
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   _buildAutoCompleteWidget(
-                                    string: _dataController.cylinderNumber,
-                                    search: _dataController.autoCompleteType,
-                                    cyls: _dataController.filteredCylinderList,
+                                    string: _dataController!.cylinderNumber,
+                                    search: _dataController!.autoCompleteType,
+                                    cyls: _dataController!.filteredCylinderList,
                                   )
                                 ],
                               ),
@@ -280,7 +295,7 @@ class _ReceivingScreenState extends State<ReceivingScreen>
                     ),
                   ),
                 )
-              : _dataController.processType == ProcessType.RETURNING
+              : _dataController!.processType == ProcessType.RETURNING
                   ?
                   //LISTVIEW WIDGET FOR RETURN PROCESS
                   Expanded(
@@ -289,7 +304,7 @@ class _ReceivingScreenState extends State<ReceivingScreen>
                           children: [
                             Column(
                               children:
-                                  _dataController.cylinderToReturn.map((e) {
+                                  _dataController!.cylinderToReturn.map((e) {
                                 return Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: Container(
@@ -312,7 +327,7 @@ class _ReceivingScreenState extends State<ReceivingScreen>
                                         subtitle: Text(e.gasName),
                                         trailing: IconButton(
                                           onPressed: () {
-                                            _dataController
+                                            _dataController!
                                                 .removeCylinderFromReturnList(
                                                     e.gasId);
                                           },
@@ -327,7 +342,7 @@ class _ReceivingScreenState extends State<ReceivingScreen>
                             ),
                             Visibility(
                               visible:
-                                  _dataController.cylinderNumber.isNotEmpty,
+                                  _dataController!.cylinderNumber.isNotEmpty,
                               child: Padding(
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 8),
@@ -339,12 +354,12 @@ class _ReceivingScreenState extends State<ReceivingScreen>
                                       color: Colors.white,
                                       borderRadius: kDefaultBorderRadiusAll),
                                   width: getW(context),
-                                  height: (_dataController.autoCompleteType ==
+                                  height: (_dataController!.autoCompleteType ==
                                               AutoCompleteType.ADD_ITEM) ||
-                                          (_dataController.autoCompleteType ==
+                                          (_dataController!.autoCompleteType ==
                                               AutoCompleteType.WAITING)
                                       ? 86
-                                      : _dataController.autoCompleteType ==
+                                      : _dataController!.autoCompleteType ==
                                               AutoCompleteType.DISPLAY_LIST
                                           ? 256
                                           : 0,
@@ -354,10 +369,10 @@ class _ReceivingScreenState extends State<ReceivingScreen>
                                         CrossAxisAlignment.center,
                                     children: [
                                       _buildAutoCompleteWidget(
-                                        string: _dataController.cylinderNumber,
+                                        string: _dataController!.cylinderNumber,
                                         search:
-                                            _dataController.autoCompleteType,
-                                        cyls: _dataController
+                                            _dataController!.autoCompleteType,
+                                        cyls: _dataController!
                                             .filteredCylinderList,
                                       )
                                     ],
@@ -369,419 +384,434 @@ class _ReceivingScreenState extends State<ReceivingScreen>
                         ),
                       ),
                     )
-                  : Expanded(
-                      child: DataTable(
-                        headingRowColor: WidgetStateColor.resolveWith(
-                            (states) => MainColor.getColor(1)),
-                        columns: [
-                          DataColumn(
-                              label: Text(
-                            "Tipe\nGas",
-                            style: TextStyle(
-                                fontSize: 14, fontWeight: FontWeight.bold),
-                          )),
-                          DataColumn(
-                              label: Text(
-                            "Qty\nReceive",
-                            style: TextStyle(
-                                fontSize: 14, fontWeight: FontWeight.bold),
-                          )),
-                          DataColumn(
-                              label: Text(
-                            "Qty\nReturn",
-                            style: TextStyle(
-                                fontSize: 14, fontWeight: FontWeight.bold),
-                          ))
-                        ],
-                        rows: [
-                          DataRow(cells: [
-                            DataCell(
-                              Container(
-                                decoration: BoxDecoration(
-                                    color: Colors.red.shade800,
-                                    borderRadius: kDefaultBorderRadiusAll),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8.0, vertical: 4),
-                                  child: Text(
-                                    "Acetylene",
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            DataCell(Text(_dataController.cylinderToReceive
-                                .where((e) => e.gasType == GasType.ACETYLENE)
-                                .toList()
-                                .length
-                                .toString())),
-                            DataCell(Text(_dataController.cylinderToReturn
-                                .where((e) => e.gasType == GasType.ACETYLENE)
-                                .toList()
-                                .length
-                                .toString())),
-                          ]),
-                          DataRow(cells: [
-                            DataCell(
-                              Container(
-                                decoration: BoxDecoration(
-                                    color: Colors.lightBlue.shade200,
-                                    borderRadius: kDefaultBorderRadiusAll),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8.0, vertical: 4),
-                                  child: Text(
-                                    "Nitrogen",
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            DataCell(Text(_dataController.cylinderToReceive
-                                .where((e) => e.gasType == GasType.NITROGEN)
-                                .toList()
-                                .length
-                                .toString())),
-                            DataCell(Text(_dataController.cylinderToReturn
-                                .where((e) => e.gasType == GasType.NITROGEN)
-                                .toList()
-                                .length
-                                .toString())),
-                          ]),
-                          DataRow(cells: [
-                            DataCell(
-                              Container(
-                                decoration: BoxDecoration(
-                                    color: Colors.blue.shade600,
-                                    borderRadius: kDefaultBorderRadiusAll),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8.0, vertical: 4),
-                                  child: Text(
-                                    "Oxygent",
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            DataCell(Text(_dataController.cylinderToReceive
-                                .where((e) => e.gasType == GasType.OXYGENT)
-                                .toList()
-                                .length
-                                .toString())),
-                            DataCell(Text(_dataController.cylinderToReturn
-                                .where((e) => e.gasType == GasType.OXYGENT)
-                                .toList()
-                                .length
-                                .toString())),
-                          ]),
-                          DataRow(cells: [
-                            DataCell(
-                              Container(
-                                decoration: BoxDecoration(
-                                    color: Colors.green.shade400,
-                                    borderRadius: kDefaultBorderRadiusAll),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8.0, vertical: 4),
-                                  child: Text(
-                                    "Carbon",
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            DataCell(Text(_dataController.cylinderToReceive
-                                .where((e) => e.gasType == GasType.CARBON)
-                                .toList()
-                                .length
-                                .toString())),
-                            DataCell(Text(_dataController.cylinderToReturn
-                                .where((e) => e.gasType == GasType.CARBON)
-                                .toList()
-                                .length
-                                .toString())),
-                          ]),
-                          DataRow(
-                              color: WidgetStateColor.resolveWith(
-                                  (states) => MainColor.getColor(1)),
-                              cells: [
+                  : _dataController!.processType == ProcessType.CHECKOUT
+                      ? Expanded(
+                          child: DataTable(
+                            headingRowColor: WidgetStateColor.resolveWith(
+                                (states) => MainColor.getColor(1)),
+                            columns: [
+                              DataColumn(
+                                  label: Text(
+                                "Tipe\nGas",
+                                style: TextStyle(
+                                    fontSize: 14, fontWeight: FontWeight.bold),
+                              )),
+                              DataColumn(
+                                  label: Text(
+                                "Qty\nReceive",
+                                style: TextStyle(
+                                    fontSize: 14, fontWeight: FontWeight.bold),
+                              )),
+                              DataColumn(
+                                  label: Text(
+                                "Qty\nReturn",
+                                style: TextStyle(
+                                    fontSize: 14, fontWeight: FontWeight.bold),
+                              ))
+                            ],
+                            rows: [
+                              DataRow(cells: [
                                 DataCell(
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8.0, vertical: 4),
-                                    child: Text(
-                                      "Total",
-                                      style: TextStyle(),
-                                    ),
-                                  ),
-                                ),
-                                DataCell(
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(_dataController
-                                          .cylinderToReceive.length
-                                          .toString()),
-                                      InkWell(
-                                        child: Icon(
-                                          Icons.zoom_out_map_outlined,
-                                          color: MainColor.brandColor,
-                                        ),
-                                        onTap: () {
-                                          showDialog(
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return OrderListDialog(
-                                                    gasCyl: _dataController
-                                                        .cylinderToReceive);
-                                              });
-                                        },
-                                      )
-                                    ],
-                                  ),
-                                ),
-                                DataCell(
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(_dataController
-                                          .cylinderToReturn.length
-                                          .toString()),
-                                      InkWell(
-                                        child: Icon(
-                                          Icons.zoom_out_map_outlined,
-                                          color: MainColor.brandColor,
-                                        ),
-                                        onTap: () {
-                                          showDialog(
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return OrderListDialog(
-                                                    gasCyl: _dataController
-                                                        .cylinderToReturn);
-                                              });
-                                        },
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              ]),
-                        ],
-                      ),
-
-                      // child: Column(
-                      //   children: [
-                      //     Expanded(
-                      //       flex: 0,
-                      //       child: Padding(
-                      //         padding: const EdgeInsets.all(8.0),
-                      //         child: Row(
-                      //           mainAxisAlignment: MainAxisAlignment.center,
-                      //           crossAxisAlignment: CrossAxisAlignment.center,
-                      //           children: [
-                      //             Expanded(
-                      //                 child: Center(
-                      //                     child: Text("Botol Diterima"))),
-                      //             Expanded(
-                      //                 child:
-                      //                     Center(child: Text("Botol Dikirim")))
-                      //           ],
-                      //         ),
-                      //       ),
-                      //     ),
-                      //     Expanded(
-                      //       child: Row(
-                      //         children: [
-                      //           Expanded(
-                      //             child: Padding(
-                      //               padding: const EdgeInsets.all(8.0),
-                      //               child: Container(
-                      //                 decoration: BoxDecoration(
-                      //                   border: Border.all(
-                      //                       color: MainColor.getColor(2)),
-                      //                 ),
-                      //                 height: double.infinity,
-                      //                 child: ListView(
-                      //                   children: _dataController
-                      //                       .cylinderToReceive
-                      //                       .map((e) {
-                      //                     return ListTile(
-                      //                       title: Text(e.gasId),
-                      //                       subtitle: Text(
-                      //                         e.gasName,
-                      //                         style: TextStyle(fontSize: 12),
-                      //                       ),
-                      //                       leading: e.gasContent ==
-                      //                               GasContent.FILLED
-                      //                           ? Image.asset(
-                      //                               "lib/assets/image/${e.gasType.name.toLowerCase()}.png",
-                      //                               width: 36,
-                      //                               height: 36,
-                      //                             )
-                      //                           : Image.asset(
-                      //                               "lib/assets/image/${e.gasType.name.toLowerCase()}-empty-white.png",
-                      //                               width: 36,
-                      //                               height: 36,
-                      //                             ),
-                      //                     );
-                      //                   }).toList(),
-                      //                 ),
-                      //               ),
-                      //             ),
-                      //           ),
-                      //           Expanded(
-                      //             child: Padding(
-                      //               padding: const EdgeInsets.all(8.0),
-                      //               child: Container(
-                      //                 decoration: BoxDecoration(
-                      //                     border: Border.all(
-                      //                         color: MainColor.getColor(2))),
-                      //                 height: double.infinity,
-                      //                 child: ListView(
-                      //                   children: _dataController
-                      //                       .cylinderToReturn
-                      //                       .map((e) {
-                      //                     return ListTile(
-                      //                       title: Text(e.gasId),
-                      //                       subtitle: Text(
-                      //                         e.gasName,
-                      //                         style: TextStyle(fontSize: 12),
-                      //                       ),
-                      //                       leading: e.gasContent ==
-                      //                               GasContent.FILLED
-                      //                           ? Image.asset(
-                      //                               "lib/assets/image/${e.gasType.name.toLowerCase()}.png",
-                      //                               width: 36,
-                      //                               height: 36,
-                      //                             )
-                      //                           : Image.asset(
-                      //                               "lib/assets/image/${e.gasType.name.toLowerCase()}-empty-white.png",
-                      //                               width: 36,
-                      //                               height: 36,
-                      //                             ),
-                      //                     );
-                      //                   }).toList(),
-                      //                 ),
-                      //               ),
-                      //             ),
-                      //           ),
-                      //         ],
-                      //       ),
-                      //     ),
-                      //   ],
-                      // ),
-                    ),
-          Expanded(
-              flex: 0,
-              child: CButton(
-                  buttonColor: MainColor.brandColor,
-                  caption: "Submit",
-                  onPressed: () async {
-                    if (_dataController.processType == ProcessType.RETURNING) {
-                      if (_dataController.cylinderToReturn.length > 0) {
-                        QuickAlert.show(
-                          context: context,
-                          type: QuickAlertType.confirm,
-                          text: 'Anda yakin untuk Return?',
-                          confirmBtnText: 'Yes',
-                          cancelBtnText: 'No',
-                          confirmBtnColor: Colors.green,
-                          onConfirmBtnTap: () {
-                            _controller.addStepper();
-                            _dataController.proceedToCheckout();
-                            Navigator.pop(context, true);
-                            cSnackbar(context, "Sukses Menyimpan Data!", 2);
-                          },
-                        );
-                      } else {
-                        QuickAlert.show(
-                          context: context,
-                          type: QuickAlertType.error,
-                          text: 'Data Kosong',
-                          confirmBtnText: 'Ok',
-                          confirmBtnColor: Colors.green,
-                          onConfirmBtnTap: () {
-                            Navigator.pop(context, true);
-                          },
-                        );
-                      }
-                    } else if (_dataController.processType ==
-                        ProcessType.RECEIVING) {
-                      if (_dataController.cylinderToReceive.length > 0) {
-                        QuickAlert.show(
-                          context: context,
-                          type: QuickAlertType.confirm,
-                          text: 'Anda yakin untuk Receive?',
-                          confirmBtnText: 'Yes',
-                          cancelBtnText: 'No',
-                          confirmBtnColor: Colors.green,
-                          onConfirmBtnTap: () {
-                            _controller.addStepper();
-                            _dataController.proceedToReturn();
-                            Navigator.pop(context, true);
-                            cSnackbar(context, "Sukses Menyimpan Data!", 2);
-                          },
-                        );
-                      } else {
-                        QuickAlert.show(
-                          context: context,
-                          type: QuickAlertType.error,
-                          text: 'Data Kosong',
-                          confirmBtnText: 'Ok',
-                          confirmBtnColor: Colors.green,
-                          onConfirmBtnTap: () {
-                            Navigator.pop(context, true);
-                          },
-                        );
-                      }
-                    } else {
-                      QuickAlert.show(
-                        context: context,
-                        type: QuickAlertType.confirm,
-                        text: 'Anda yakin untuk checkout transaksi?',
-                        confirmBtnText: 'Yes',
-                        cancelBtnText: 'No',
-                        confirmBtnColor: Colors.green,
-                        onConfirmBtnTap: () async {
-                          Navigator.pop(context);
-                          showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return Dialog(
-                                  child: Container(
-                                    color: Colors.white,
-                                    width: 100,
-                                    height: 200,
-                                    child: Center(
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            CircularProgressIndicator(),
-                                            vSpace(10),
-                                            Text("Sending Data"),
-                                          ],
-                                        ),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                        color: Colors.red.shade800,
+                                        borderRadius: kDefaultBorderRadiusAll),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8.0, vertical: 4),
+                                      child: Text(
+                                        "Acetylene",
+                                        style: TextStyle(color: Colors.white),
                                       ),
                                     ),
                                   ),
-                                );
-                              });
-                          await _dataController.checkoutReceiving(
-                              _controller.poNumber, _controller.dateReceived!);
-                          _dataController.resetAllReceivingStates();
+                                ),
+                                DataCell(Text(_dataController!.cylinderToReceive
+                                    .where(
+                                        (e) => e.gasType == GasType.ACETYLENE)
+                                    .toList()
+                                    .length
+                                    .toString())),
+                                DataCell(Text(_dataController!.cylinderToReturn
+                                    .where(
+                                        (e) => e.gasType == GasType.ACETYLENE)
+                                    .toList()
+                                    .length
+                                    .toString())),
+                              ]),
+                              DataRow(cells: [
+                                DataCell(
+                                  Container(
+                                    decoration: BoxDecoration(
+                                        color: Colors.lightBlue.shade200,
+                                        borderRadius: kDefaultBorderRadiusAll),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8.0, vertical: 4),
+                                      child: Text(
+                                        "Nitrogen",
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                DataCell(Text(_dataController!.cylinderToReceive
+                                    .where((e) => e.gasType == GasType.NITROGEN)
+                                    .toList()
+                                    .length
+                                    .toString())),
+                                DataCell(Text(_dataController!.cylinderToReturn
+                                    .where((e) => e.gasType == GasType.NITROGEN)
+                                    .toList()
+                                    .length
+                                    .toString())),
+                              ]),
+                              DataRow(cells: [
+                                DataCell(
+                                  Container(
+                                    decoration: BoxDecoration(
+                                        color: Colors.blue.shade600,
+                                        borderRadius: kDefaultBorderRadiusAll),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8.0, vertical: 4),
+                                      child: Text(
+                                        "Oxygent",
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                DataCell(Text(_dataController!.cylinderToReceive
+                                    .where((e) => e.gasType == GasType.OXYGENT)
+                                    .toList()
+                                    .length
+                                    .toString())),
+                                DataCell(Text(_dataController!.cylinderToReturn
+                                    .where((e) => e.gasType == GasType.OXYGENT)
+                                    .toList()
+                                    .length
+                                    .toString())),
+                              ]),
+                              DataRow(cells: [
+                                DataCell(
+                                  Container(
+                                    decoration: BoxDecoration(
+                                        color: Colors.green.shade400,
+                                        borderRadius: kDefaultBorderRadiusAll),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8.0, vertical: 4),
+                                      child: Text(
+                                        "Carbon",
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                DataCell(Text(_dataController!.cylinderToReceive
+                                    .where((e) => e.gasType == GasType.CARBON)
+                                    .toList()
+                                    .length
+                                    .toString())),
+                                DataCell(Text(_dataController!.cylinderToReturn
+                                    .where((e) => e.gasType == GasType.CARBON)
+                                    .toList()
+                                    .length
+                                    .toString())),
+                              ]),
+                              DataRow(
+                                  color: WidgetStateColor.resolveWith(
+                                      (states) => MainColor.getColor(1)),
+                                  cells: [
+                                    DataCell(
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8.0, vertical: 4),
+                                        child: Text(
+                                          "Total",
+                                          style: TextStyle(),
+                                        ),
+                                      ),
+                                    ),
+                                    DataCell(
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(_dataController!
+                                              .cylinderToReceive.length
+                                              .toString()),
+                                          InkWell(
+                                            child: Icon(
+                                              Icons.zoom_out_map_outlined,
+                                              color: MainColor.brandColor,
+                                            ),
+                                            onTap: () {
+                                              showDialog(
+                                                  context: context,
+                                                  builder:
+                                                      (BuildContext context) {
+                                                    return OrderListDialog(
+                                                        gasCyl: _dataController!
+                                                            .cylinderToReceive);
+                                                  });
+                                            },
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    DataCell(
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(_dataController!
+                                              .cylinderToReturn.length
+                                              .toString()),
+                                          InkWell(
+                                            child: Icon(
+                                              Icons.zoom_out_map_outlined,
+                                              color: MainColor.brandColor,
+                                            ),
+                                            onTap: () {
+                                              showDialog(
+                                                  context: context,
+                                                  builder:
+                                                      (BuildContext context) {
+                                                    return OrderListDialog(
+                                                        gasCyl: _dataController!
+                                                            .cylinderToReturn);
+                                                  });
+                                            },
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ]),
+                            ],
+                          ),
 
-                          Navigator.pop(context, true);
-                          cSnackbar(context, "Sukses Menyimpan Data!", 2);
-                        },
-                      );
-                    }
-                  }))
+                          // child: Column(
+                          //   children: [
+                          //     Expanded(
+                          //       flex: 0,
+                          //       child: Padding(
+                          //         padding: const EdgeInsets.all(8.0),
+                          //         child: Row(
+                          //           mainAxisAlignment: MainAxisAlignment.center,
+                          //           crossAxisAlignment: CrossAxisAlignment.center,
+                          //           children: [
+                          //             Expanded(
+                          //                 child: Center(
+                          //                     child: Text("Botol Diterima"))),
+                          //             Expanded(
+                          //                 child:
+                          //                     Center(child: Text("Botol Dikirim")))
+                          //           ],
+                          //         ),
+                          //       ),
+                          //     ),
+                          //     Expanded(
+                          //       child: Row(
+                          //         children: [
+                          //           Expanded(
+                          //             child: Padding(
+                          //               padding: const EdgeInsets.all(8.0),
+                          //               child: Container(
+                          //                 decoration: BoxDecoration(
+                          //                   border: Border.all(
+                          //                       color: MainColor.getColor(2)),
+                          //                 ),
+                          //                 height: double.infinity,
+                          //                 child: ListView(
+                          //                   children: _dataController
+                          //                       .cylinderToReceive
+                          //                       .map((e) {
+                          //                     return ListTile(
+                          //                       title: Text(e.gasId),
+                          //                       subtitle: Text(
+                          //                         e.gasName,
+                          //                         style: TextStyle(fontSize: 12),
+                          //                       ),
+                          //                       leading: e.gasContent ==
+                          //                               GasContent.FILLED
+                          //                           ? Image.asset(
+                          //                               "lib/assets/image/${e.gasType.name.toLowerCase()}.png",
+                          //                               width: 36,
+                          //                               height: 36,
+                          //                             )
+                          //                           : Image.asset(
+                          //                               "lib/assets/image/${e.gasType.name.toLowerCase()}-empty-white.png",
+                          //                               width: 36,
+                          //                               height: 36,
+                          //                             ),
+                          //                     );
+                          //                   }).toList(),
+                          //                 ),
+                          //               ),
+                          //             ),
+                          //           ),
+                          //           Expanded(
+                          //             child: Padding(
+                          //               padding: const EdgeInsets.all(8.0),
+                          //               child: Container(
+                          //                 decoration: BoxDecoration(
+                          //                     border: Border.all(
+                          //                         color: MainColor.getColor(2))),
+                          //                 height: double.infinity,
+                          //                 child: ListView(
+                          //                   children: _dataController
+                          //                       .cylinderToReturn
+                          //                       .map((e) {
+                          //                     return ListTile(
+                          //                       title: Text(e.gasId),
+                          //                       subtitle: Text(
+                          //                         e.gasName,
+                          //                         style: TextStyle(fontSize: 12),
+                          //                       ),
+                          //                       leading: e.gasContent ==
+                          //                               GasContent.FILLED
+                          //                           ? Image.asset(
+                          //                               "lib/assets/image/${e.gasType.name.toLowerCase()}.png",
+                          //                               width: 36,
+                          //                               height: 36,
+                          //                             )
+                          //                           : Image.asset(
+                          //                               "lib/assets/image/${e.gasType.name.toLowerCase()}-empty-white.png",
+                          //                               width: 36,
+                          //                               height: 36,
+                          //                             ),
+                          //                     );
+                          //                   }).toList(),
+                          //                 ),
+                          //               ),
+                          //             ),
+                          //           ),
+                          //         ],
+                          //       ),
+                          //     ),
+                          //   ],
+                          // ),
+                        )
+                      : Expanded(
+                          child:
+                              Center(child: Text("Please wait to return.."))),
+          Visibility(
+            visible: _dataController!.processType != ProcessType.DONE,
+            child: Expanded(
+                flex: 0,
+                child: CButton(
+                    buttonColor: MainColor.brandColor,
+                    caption: "Submit",
+                    onPressed: () async {
+                      if (_dataController!.processType ==
+                          ProcessType.RETURNING) {
+                        if (_dataController!.cylinderToReturn.length > 0) {
+                          QuickAlert.show(
+                            context: context,
+                            type: QuickAlertType.confirm,
+                            text: 'Anda yakin untuk Return?',
+                            confirmBtnText: 'Yes',
+                            cancelBtnText: 'No',
+                            confirmBtnColor: Colors.green,
+                            onConfirmBtnTap: () {
+                              _controller!.addStepper();
+                              _dataController!.proceedToCheckout();
+                              Navigator.pop(context, true);
+                              cSnackbar(context, "Sukses Menyimpan Data!", 2);
+                            },
+                          );
+                        } else {
+                          QuickAlert.show(
+                            context: context,
+                            type: QuickAlertType.error,
+                            text: 'Data Kosong',
+                            confirmBtnText: 'Ok',
+                            confirmBtnColor: Colors.green,
+                            onConfirmBtnTap: () {
+                              Navigator.pop(context, true);
+                            },
+                          );
+                        }
+                      } else if (_dataController!.processType ==
+                          ProcessType.RECEIVING) {
+                        if (_dataController!.cylinderToReceive.length > 0) {
+                          QuickAlert.show(
+                            context: context,
+                            type: QuickAlertType.confirm,
+                            text: 'Anda yakin untuk Receive?',
+                            confirmBtnText: 'Yes',
+                            cancelBtnText: 'No',
+                            confirmBtnColor: Colors.green,
+                            onConfirmBtnTap: () {
+                              _controller!.addStepper();
+                              _dataController!.proceedToReturn();
+                              Navigator.pop(context, true);
+                              cSnackbar(context, "Sukses Menyimpan Data!", 2);
+                            },
+                          );
+                        } else {
+                          QuickAlert.show(
+                            context: context,
+                            type: QuickAlertType.error,
+                            text: 'Data Kosong',
+                            confirmBtnText: 'Ok',
+                            confirmBtnColor: Colors.green,
+                            onConfirmBtnTap: () {
+                              Navigator.pop(context, true);
+                            },
+                          );
+                        }
+                      } else {
+                        QuickAlert.show(
+                          context: context,
+                          type: QuickAlertType.confirm,
+                          text: 'Anda yakin untuk checkout transaksi?',
+                          confirmBtnText: 'Yes',
+                          cancelBtnText: 'No',
+                          confirmBtnColor: Colors.green,
+                          onConfirmBtnTap: () async {
+                            Navigator.pop(context);
+                            showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return Dialog(
+                                    child: Container(
+                                      color: Colors.white,
+                                      width: 100,
+                                      height: 200,
+                                      child: Center(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              CircularProgressIndicator(),
+                                              vSpace(10),
+                                              Text("Sending Data"),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                });
+                            await _dataController!.checkoutReceiving(
+                                _controller!.poNumber,
+                                _controller!.dateReceived!);
+
+                            _controller!.addStepper();
+                            Navigator.pop(context, true);
+                            cSnackbar(context, "Sukses Menyimpan Data!", 2);
+                            await Future.delayed(const Duration(seconds: 2));
+                            resetAllReceivingStates();
+                          },
+                        );
+                      }
+                    })),
+          )
         ],
       ),
     );
@@ -798,7 +828,7 @@ class _ReceivingScreenState extends State<ReceivingScreen>
     } else if (search == AutoCompleteType.DISPLAY_LIST) {
       return Builder(builder: (context) {
         DataController _dataController = Provider.of<DataController>(context);
-        if (_dataController.searchResult == SearchResult.EXACT) {
+        if (_dataController!.searchResult == SearchResult.EXACT) {
           return SizedBox(
             height: 230,
             child: ListView(
@@ -824,10 +854,10 @@ class _ReceivingScreenState extends State<ReceivingScreen>
                   ),
                   onTap: () async {
                     final data;
-                    if (_dataController.processType == ProcessType.RECEIVING) {
-                      data = await _dataController.addCylinderToReceive(e);
+                    if (_dataController!.processType == ProcessType.RECEIVING) {
+                      data = await _dataController!.addCylinderToReceive(e);
                     } else {
-                      data = await _dataController.addCylinderToReturn(e);
+                      data = await _dataController!.addCylinderToReturn(e);
                     }
                     if (data != 'success') {
                       QuickAlert.show(
@@ -836,7 +866,7 @@ class _ReceivingScreenState extends State<ReceivingScreen>
                           text: data,
                           title: "Duplicate");
                     }
-                    _dataController.resetCylinderNumber();
+                    _dataController!.resetCylinderNumber();
                     txtCon.clear();
                   },
                 ),
@@ -901,13 +931,13 @@ class _ReceivingScreenState extends State<ReceivingScreen>
                         color: MainColor.brandColor,
                       ),
                       onTap: () {
-                        if (_dataController.processType ==
+                        if (_dataController!.processType ==
                             ProcessType.RECEIVING) {
-                          _dataController.addCylinderToReceive(e);
+                          _dataController!.addCylinderToReceive(e);
                         } else {
-                          _dataController.addCylinderToReturn(e);
+                          _dataController!.addCylinderToReturn(e);
                         }
-                        _dataController.resetCylinderNumber();
+                        _dataController!.resetCylinderNumber();
                         txtCon.clear();
                       },
                     ),
