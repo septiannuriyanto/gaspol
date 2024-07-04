@@ -21,7 +21,7 @@ class DashboardScreenController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void loadData() async {
+  Future loadData() async {
     _stockStatus.clear();
     await Future.delayed(const Duration(seconds: 2));
     for (var element in Locations) {

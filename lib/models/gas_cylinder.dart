@@ -23,6 +23,7 @@ List<String> Location = [
 ];
 
 class GasCylinder {
+  String? jobsite;
   GasType gasType;
   String gasId;
   String gasName;
@@ -33,6 +34,7 @@ class GasCylinder {
   GasContent gasContent;
 
   GasCylinder({
+    this.jobsite,
     required this.gasId,
     required this.gasName,
     required this.gasType,

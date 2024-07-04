@@ -14,20 +14,13 @@ class MongoDatabase {
       db!.collection(dotenv.env['DB_STOCK_COLLECTION']!);
   static final DbCollection cylTrans =
       db!.collection(dotenv.env['DB_TRANS_COLLECTION']!);
+  static final DbCollection appCol =
+      db!.collection(dotenv.env['DB_APP_COLLECTION']!);
 
   static Future<void> connect() async {
     try {
       db = await Db.create(dotenv.env['DB_URL']!);
-      // while (db!.state == ConnectionState.active) {
-      //   await Future.delayed(Duration(milliseconds: 100));
-      // }
-      // if (db!.isConnected) return;
-      // await db!.close();
-      // await db!.open();
-      // return;
-
-      if (db!.isConnected) await db!.close();
-      await db!.open(secure: true);
+      await db!.open(secure: false);
       inspect(db);
       var status = await db!.serverStatus();
       print(status);
@@ -274,10 +267,21 @@ class MongoDatabase {
     return _cyls;
   }
 
+  static Future<int> getLatestAppVer() async {
+    Map<String, dynamic>? res;
+    try {
+      res = await appCol.findOne(where.sortBy('date', descending: true));
+    } catch (e) {
+      print(e);
+    }
+
+    return res!['appver'];
+  }
+
   static Future<int> checkCylinderRegistration(String gasId) async {
     List<GasCylinder> _cyls = [];
     try {
-      await cylStock.find({
+      await appCol.find({
         'gas_id': gasId,
       }).forEach((element) {
         _cyls.add(GasCylinder.fromMap(element));

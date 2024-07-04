@@ -30,11 +30,12 @@ class StockScreen extends StatelessWidget {
         children: [
           Text(
             "Welcome, User",
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            style: TextStyle(
+                color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
           ),
           Text(
             "Hari ini : ${todayInd}",
-            style: TextStyle(color: Colors.grey),
+            style: TextStyle(color: MainColor.getColor(1), fontSize: 12),
           ),
           SizedBox(
             height: 20,
@@ -97,7 +98,7 @@ class StockScreen extends StatelessWidget {
         minWidth: getW(context),
       ),
       decoration: BoxDecoration(
-          color: Colors.white,
+          color: Colors.white38,
           borderRadius: kDefaultBorderRadiusAll,
           boxShadow: [kDefaultBoxShadow]),
       child: Padding(
@@ -111,7 +112,7 @@ class StockScreen extends StatelessWidget {
                 style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: MainColor.getColor(4)),
+                    color: MainColor.getColor(6)),
               ),
             ),
             Container(
@@ -231,224 +232,237 @@ class StockScreen extends StatelessWidget {
   _buildRegistrationDashboard(BuildContext context) {
     DashboardScreenController _dbController =
         Provider.of<DashboardScreenController>(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Padding(
-          padding: EdgeInsets.all(kDefaultPadding),
-          child: Center(
-            child: Text(
-              "Pending Registrasi Tabung",
-              style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: MainColor.getColor(4)),
+    return Container(
+      color: Colors.white30,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Padding(
+            padding: EdgeInsets.all(kDefaultPadding),
+            child: Center(
+              child: Text(
+                "Pending Registrasi Tabung",
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: MainColor.getColor(7)),
+              ),
             ),
           ),
-        ),
-        Expanded(
-            child: _dbController.unregisteredCylinder.isEmpty
-                ? Center(
-                    child: CircularProgressIndicator(
-                    color: MainColor.getColor(2),
-                  ))
-                : ListView(
-                    children: _dbController.unregisteredCylinder.map((e) {
-                      return Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Container(
-                          height: 140,
-                          decoration: BoxDecoration(
-                              borderRadius: kDefaultBorderRadiusAll,
-                              color: MainColor.getColor(1)),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ListTile(
-                                leading: e.gasContent == GasContent.FILLED
-                                    ? Image.asset(
-                                        "lib/assets/image/${e.gasType.name.toLowerCase()}.png",
-                                        width: 36,
-                                        height: 36,
-                                      )
-                                    : Image.asset(
-                                        "lib/assets/image/${e.gasType.name.toLowerCase()}-empty-white.png",
-                                        width: 36,
-                                        height: 36,
-                                      ),
-                                title: Text(e.gasId),
-                                subtitle: Text(e.gasName),
-                                trailing: PopupMenuButton(
-                                    onSelected: (value) async {
-                                      final pass = await showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            var passs;
-                                            return Dialog(
-                                              backgroundColor:
-                                                  Colors.transparent,
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(8.0),
-                                                child: Container(
-                                                  color: Colors.white,
-                                                  height: 160,
-                                                  width: 200,
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            8.0),
-                                                    child: Column(
-                                                      children: [
-                                                        vSpace(10),
-                                                        Text(
-                                                            "Enter Admin Password"),
-                                                        CustomTextField(
-                                                          obscureText: true,
-                                                          onChanged: (p0) =>
-                                                              passs = p0,
-                                                        ),
-                                                        vSpace(20),
-                                                        CButton(
-                                                            buttonColor:
-                                                                MainColor
-                                                                    .brandColor,
-                                                            onPressed: () {
-                                                              Navigator.pop(
-                                                                  context,
-                                                                  passs);
-                                                            })
-                                                      ],
+          Expanded(
+              child: _dbController.unregisteredCylinder.isEmpty
+                  ? Center(
+                      child: CircularProgressIndicator(
+                      color: MainColor.getColor(2),
+                    ))
+                  : ListView(
+                      children: _dbController.unregisteredCylinder.map((e) {
+                        return Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            height: 140,
+                            decoration: BoxDecoration(
+                                borderRadius: kDefaultBorderRadiusAll,
+                                color: MainColor.getColor(1)),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ListTile(
+                                  leading: e.gasContent == GasContent.FILLED
+                                      ? Image.asset(
+                                          "lib/assets/image/${e.gasType.name.toLowerCase()}.png",
+                                          width: 36,
+                                          height: 36,
+                                        )
+                                      : Image.asset(
+                                          "lib/assets/image/${e.gasType.name.toLowerCase()}-empty-white.png",
+                                          width: 36,
+                                          height: 36,
+                                        ),
+                                  title: Text(e.gasId),
+                                  subtitle: Text(e.gasName),
+                                  trailing: PopupMenuButton(
+                                      onSelected: (value) async {
+                                        final pass = await showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              var passs;
+                                              return Dialog(
+                                                backgroundColor:
+                                                    Colors.transparent,
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(8.0),
+                                                  child: Container(
+                                                    color: Colors.white,
+                                                    height: 160,
+                                                    width: 200,
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              8.0),
+                                                      child: Column(
+                                                        children: [
+                                                          vSpace(10),
+                                                          Text(
+                                                              "Enter Admin Password"),
+                                                          CustomTextField(
+                                                            obscureText: true,
+                                                            onChanged: (p0) =>
+                                                                passs = p0,
+                                                          ),
+                                                          vSpace(20),
+                                                          CButton(
+                                                              buttonColor:
+                                                                  MainColor
+                                                                      .brandColor,
+                                                              onPressed: () {
+                                                                Navigator.pop(
+                                                                    context,
+                                                                    passs);
+                                                              })
+                                                        ],
+                                                      ),
                                                     ),
                                                   ),
                                                 ),
-                                              ),
-                                            );
-                                          });
+                                              );
+                                            });
 
-                                      if (pass != "scal4r") {
-                                        cSnackbar(
-                                            context, "Password Salah!", 1);
-                                        return;
-                                      }
-                                      if (value == 0) {
-                                        await _dbController
-                                            .approveRegistration(e.gasId);
-                                        cSnackbar(
-                                            context, "Approve Success", 1);
-                                      } else {
-                                        await _dbController
-                                            .deleteRegistration(e.gasId);
-                                        cSnackbar(context, "Delete Success", 1);
-                                      }
-                                    },
-                                    itemBuilder: (ctx) => [
-                                          _buildPopupMenuItem(
-                                              'Approve',
-                                              Icons.done_outline,
-                                              Options.approve.index),
-                                          _buildPopupMenuItem(
-                                              'Delete',
-                                              Icons.disabled_by_default_rounded,
-                                              Options.delete.index),
-                                        ]),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(left: 58.0),
-                                child: Text(
-                                    "Registered at : ${convertToIndDate(e.dateRegistered)}"),
-                              ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.only(left: 58.0, top: 4),
-                                child: Text("by : ${e.registor}"),
-                              ),
-                            ],
+                                        if (pass != "scal4r") {
+                                          cSnackbar(
+                                              context, "Password Salah!", 1);
+                                          return;
+                                        }
+                                        if (value == 0) {
+                                          await _dbController
+                                              .approveRegistration(e.gasId);
+                                          cSnackbar(
+                                              context, "Approve Success", 1);
+                                        } else {
+                                          await _dbController
+                                              .deleteRegistration(e.gasId);
+                                          cSnackbar(
+                                              context, "Delete Success", 1);
+                                        }
+                                      },
+                                      itemBuilder: (ctx) => [
+                                            _buildPopupMenuItem(
+                                                'Approve',
+                                                Icons.done_outline,
+                                                Options.approve.index),
+                                            _buildPopupMenuItem(
+                                                'Delete',
+                                                Icons
+                                                    .disabled_by_default_rounded,
+                                                Options.delete.index),
+                                          ]),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 58.0),
+                                  child: Text(
+                                      "Registered at : ${convertToIndDate(e.dateRegistered)}"),
+                                ),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.only(left: 58.0, top: 4),
+                                  child: Text("by : ${e.registor}"),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    }).toList(),
-                  ))
-      ],
+                        );
+                      }).toList(),
+                    ))
+        ],
+      ),
     );
   }
 
   _buildLocationDashboard(BuildContext context) {
     DashboardScreenController _dbController =
         Provider.of<DashboardScreenController>(context);
-    return Column(
-      children: [
-        Padding(
-          padding: EdgeInsets.all(kDefaultPadding),
-          child: Text(
-            "List Tabung Kosong",
-            style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: MainColor.getColor(4)),
+    return Container(
+      color: Colors.white38,
+      child: Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.all(kDefaultPadding),
+            child: Text(
+              "List Tabung Kosong",
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: MainColor.getColor(7)),
+            ),
           ),
-        ),
-        Container(
-            height: getW(context),
-            width: double.infinity,
-            child: DataTable(
-              columnSpacing: 0,
-              headingRowColor: WidgetStatePropertyAll(MainColor.getColor(2)),
-              columns: [
-                DataColumn(
-                  label: Text(
-                    "Location",
-                    style: TextStyle(fontSize: 10),
-                  ),
-                ),
-                DataColumn(
-                  label: Text(
-                    "C2H2",
-                    style: TextStyle(fontSize: 10),
-                  ),
-                ),
-                DataColumn(
-                  label: Text(
-                    "N2",
-                    style: TextStyle(fontSize: 10),
-                  ),
-                ),
-                DataColumn(
-                  label: Text(
-                    "O2",
-                    style: TextStyle(fontSize: 10),
-                  ),
-                ),
-                DataColumn(
-                  label: Text(
-                    "CO2",
-                    style: TextStyle(fontSize: 10),
-                  ),
-                ),
-              ],
-              rows: _dbController.stockStatus.map((e) {
-                return DataRow(
-                  cells: [
-                    DataCell(
-                      Text(e.location),
+          Container(
+              height: getW(context),
+              width: double.infinity,
+              child: DataTable(
+                columnSpacing: 0,
+                headingRowColor: WidgetStatePropertyAll(MainColor.getColor(8)),
+                columns: [
+                  DataColumn(
+                    label: Text(
+                      "Location",
+                      style:
+                          TextStyle(fontSize: 10, color: MainColor.getColor(0)),
                     ),
-                    DataCell(
-                      Text('${e.emptyQty[0]}'),
+                  ),
+                  DataColumn(
+                    label: Text(
+                      "C2H2",
+                      style:
+                          TextStyle(fontSize: 10, color: MainColor.getColor(0)),
                     ),
-                    DataCell(
-                      Text('${e.emptyQty[1]}'),
+                  ),
+                  DataColumn(
+                    label: Text(
+                      "N2",
+                      style:
+                          TextStyle(fontSize: 10, color: MainColor.getColor(0)),
                     ),
-                    DataCell(
-                      Text('${e.emptyQty[2]}'),
+                  ),
+                  DataColumn(
+                    label: Text(
+                      "O2",
+                      style:
+                          TextStyle(fontSize: 10, color: MainColor.getColor(0)),
                     ),
-                    DataCell(
-                      Text('${e.emptyQty[3]}'),
+                  ),
+                  DataColumn(
+                    label: Text(
+                      "CO2",
+                      style:
+                          TextStyle(fontSize: 10, color: MainColor.getColor(0)),
                     ),
-                  ],
-                );
-              }).toList(),
-            )),
-      ],
+                  ),
+                ],
+                rows: _dbController.stockStatus.map((e) {
+                  return DataRow(
+                    cells: [
+                      DataCell(
+                        Text(e.location),
+                      ),
+                      DataCell(
+                        Text('${e.emptyQty[0]}'),
+                      ),
+                      DataCell(
+                        Text('${e.emptyQty[1]}'),
+                      ),
+                      DataCell(
+                        Text('${e.emptyQty[2]}'),
+                      ),
+                      DataCell(
+                        Text('${e.emptyQty[3]}'),
+                      ),
+                    ],
+                  );
+                }).toList(),
+              )),
+        ],
+      ),
     );
   }
 
