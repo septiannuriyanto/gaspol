@@ -16,8 +16,11 @@ import 'package:gaspol/view/dialogs/choose_cylinder.dart';
 import 'package:gaspol/view/dialogs/custom_snackbar.dart';
 import 'package:gaspol/view/dialogs/input_text_dialog.dart';
 import 'package:gaspol/view/dialogs/order_list_dialog.dart';
+import 'package:gaspol/view/screens/qr_code_scanner/qr_code_scanner.dart';
+import 'package:gaspol/view/screens/update_version_screen/update_version_screen.dart';
 import 'package:gaspol/view/utils/datetime_formatter.dart';
 import 'package:provider/provider.dart';
+
 import 'package:quickalert/quickalert.dart';
 import 'package:timer_controller/timer_controller.dart';
 
@@ -168,10 +171,12 @@ class _ReceivingScreenState extends State<ReceivingScreen>
                   style: TextStyle(fontWeight: FontWeight.bold),
                 )
               : _controller!.stepper == 2
-                  ? Text("Pilih Tabung untuk Diterima",
+                  ? Text(
+                      "Pilih Tabung untuk Diterima\n(Ketik * untuk tampil semua)",
                       style: TextStyle(fontWeight: FontWeight.bold))
                   : _controller!.stepper == 3
-                      ? Text("Pilih Tabung untuk Dikirim",
+                      ? Text(
+                          "Pilih Tabung untuk Dikirim\n(Ketik * untuk tampil semua)",
                           style: TextStyle(fontWeight: FontWeight.bold))
                       : _controller!.stepper == 4
                           ? Column(
@@ -208,6 +213,21 @@ class _ReceivingScreenState extends State<ReceivingScreen>
                         .changeAutoCompleteState(AutoCompleteType.WAITING);
                     secondsTimer.restart();
                   },
+                  suffixIcon: IconButton(
+                      onPressed: () async {
+                        final barcodeVal =
+                            await Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => const BarcodeScannerSimple(),
+                        ));
+
+                        if (barcodeVal != null) {
+                          _dataController!.setCylinderNumber(barcodeVal);
+                          _dataController!.changeAutoCompleteState(
+                              AutoCompleteType.WAITING);
+                          secondsTimer.restart();
+                        }
+                      },
+                      icon: Icon(Icons.qr_code)),
                 ),
               ),
             ),
@@ -240,7 +260,8 @@ class _ReceivingScreenState extends State<ReceivingScreen>
                                             height: 36,
                                           ),
                                     title: Text(e.gasId),
-                                    subtitle: Text(e.gasName),
+                                    subtitle:
+                                        Text('${e.gasName} | ${e.location}'),
                                     trailing: IconButton(
                                       onPressed: () {
                                         _dataController!
@@ -324,7 +345,8 @@ class _ReceivingScreenState extends State<ReceivingScreen>
                                                     height: 36,
                                                   ),
                                         title: Text(e.gasId),
-                                        subtitle: Text(e.gasName),
+                                        subtitle: Text(
+                                            '${e.gasName} | ${e.location}'),
                                         trailing: IconButton(
                                           onPressed: () {
                                             _dataController!
@@ -846,7 +868,7 @@ class _ReceivingScreenState extends State<ReceivingScreen>
                         height: 36,
                       ),
                 title: Text(e.gasId),
-                subtitle: Text(e.gasName),
+                subtitle: Text('${e.gasName} | ${e.location}'),
                 trailing: InkWell(
                   child: Icon(
                     Icons.add_circle_outline_rounded,
@@ -854,10 +876,10 @@ class _ReceivingScreenState extends State<ReceivingScreen>
                   ),
                   onTap: () async {
                     final data;
-                    if (_dataController!.processType == ProcessType.RECEIVING) {
-                      data = await _dataController!.addCylinderToReceive(e);
+                    if (_dataController.processType == ProcessType.RECEIVING) {
+                      data = await _dataController.addCylinderToReceive(e);
                     } else {
-                      data = await _dataController!.addCylinderToReturn(e);
+                      data = await _dataController.addCylinderToReturn(e);
                     }
                     if (data != 'success') {
                       QuickAlert.show(
@@ -924,7 +946,7 @@ class _ReceivingScreenState extends State<ReceivingScreen>
                             height: 36,
                           ),
                     title: Text(e.gasId),
-                    subtitle: Text(e.gasName),
+                    subtitle: Text('${e.gasName} | ${e.location}'),
                     trailing: InkWell(
                       child: Icon(
                         Icons.add_circle_outline_rounded,

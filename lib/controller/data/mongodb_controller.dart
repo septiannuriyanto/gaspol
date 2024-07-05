@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:gaspol/controller/data/receiving_data_controller.dart';
+import 'package:gaspol/models/appconfig_model.dart';
 import 'package:gaspol/models/gas_cylinder.dart';
 import 'package:gaspol/models/transaction_model.dart';
 import 'package:mongo_dart/mongo_dart.dart';
@@ -20,6 +21,7 @@ class MongoDatabase {
   static Future<void> connect() async {
     try {
       db = await Db.create(dotenv.env['DB_URL']!);
+      await dbClose();
       await db!.open(secure: false);
       inspect(db);
       var status = await db!.serverStatus();
@@ -211,6 +213,16 @@ class MongoDatabase {
     }
   }
 
+  static Future<void> changeCylinderLocation(
+      String gasId, String toLocation) async {
+    try {
+      await cylStock.update(where.eq('gas_id', gasId),
+          ModifierBuilder().set('location', toLocation));
+    } catch (e) {
+      print(e);
+    }
+  }
+
   static Future<void> deletePendingRegistration(String gasId) async {
     try {
       await cylStock.deleteOne({"gas_id": gasId});
@@ -235,47 +247,16 @@ class MongoDatabase {
     }
   }
 
-  static Future<List<GasCylinder>> fetchAllCylinderList(String source) async {
-    List<GasCylinder> _cyls = [];
-    try {
-      await cylStock.find({
-        'register_status': 'REGISTERED',
-        'gas_content': 'FILLED',
-        'location': source
-      }).forEach((element) {
-        _cyls.add(GasCylinder.fromMap(element));
-      });
-    } catch (e) {
-      print(e);
-    }
-
-    return _cyls;
-  }
-
-  static Future<List<GasCylinder>> fetchUnregisteredCylinderList() async {
-    List<GasCylinder> _cyls = [];
-    try {
-      await cylStock.find({
-        'register_status': 'PENDING',
-      }).forEach((element) {
-        _cyls.add(GasCylinder.fromMap(element));
-      });
-    } catch (e) {
-      print(e);
-    }
-
-    return _cyls;
-  }
-
-  static Future<int> getLatestAppVer() async {
+  static Future<AppConfigModel> getLatestAppVer() async {
     Map<String, dynamic>? res;
     try {
       res = await appCol.findOne(where.sortBy('date', descending: true));
+      print(res);
     } catch (e) {
       print(e);
     }
 
-    return res!['appver'];
+    return AppConfigModel.fromMap(res!);
   }
 
   static Future<int> checkCylinderRegistration(String gasId) async {
@@ -305,6 +286,58 @@ class MongoDatabase {
       }).forEach((element) {
         _cyls.add(GasCylinder.fromMap(element));
       });
+    } catch (e) {
+      print(e);
+    }
+
+    return _cyls;
+  }
+
+  static Future<List<GasCylinder>> fetchAllRegisteredCylinderList() async {
+    List<GasCylinder> _cyls = [];
+    try {
+      await cylStock.find({
+        'register_status': 'REGISTERED',
+      }).forEach((element) {
+        _cyls.add(GasCylinder.fromMap(element));
+      });
+
+      _cyls.sort((a, b) => a.gasId.compareTo(b.gasId));
+    } catch (e) {
+      print(e);
+    }
+
+    return _cyls;
+  }
+
+  static Future<List<GasCylinder>> fetchAllCylinderList(String source) async {
+    List<GasCylinder> _cyls = [];
+    try {
+      await cylStock.find({
+        'register_status': 'REGISTERED',
+        'gas_content': 'FILLED',
+        'location': source
+      }).forEach((element) {
+        _cyls.add(GasCylinder.fromMap(element));
+      });
+
+      _cyls.sort((a, b) => a.gasId.compareTo(b.gasId));
+    } catch (e) {
+      print(e);
+    }
+
+    return _cyls;
+  }
+
+  static Future<List<GasCylinder>> fetchUnregisteredCylinderList() async {
+    List<GasCylinder> _cyls = [];
+    try {
+      await cylStock.find({
+        'register_status': 'PENDING',
+      }).forEach((element) {
+        _cyls.add(GasCylinder.fromMap(element));
+      });
+      _cyls.sort((a, b) => a.gasId.compareTo(b.gasId));
     } catch (e) {
       print(e);
     }

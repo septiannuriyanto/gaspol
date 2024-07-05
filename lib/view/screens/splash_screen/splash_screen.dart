@@ -27,18 +27,15 @@ class SplashScreen extends StatelessWidget {
                     MaterialPageRoute(builder: (BuildContext context) {
                   return UpdateVersionScreen();
                 }));
-                return;
+              } else {
+                Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (BuildContext context) {
+                  return HomeScreen();
+                }));
               }
             }),
 
             _dbController.loadData(),
-
-            Future.delayed(const Duration(seconds: 4), () async {
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (BuildContext context) {
-                return HomeScreen();
-              }));
-            }),
 
             // timer(context),
           ],
@@ -67,6 +64,12 @@ class SplashScreen extends StatelessWidget {
                         'lib/assets/image/gaspol-landscape-trans.png',
                         fit: BoxFit.fitHeight,
                       ),
+                    ),
+                    Text(
+                      "Reimagine the circulation control",
+                      style: TextStyle(
+                          color: MainColor.brandColor,
+                          fontStyle: FontStyle.italic),
                     ),
                     Expanded(
                       child: SizedBox(),

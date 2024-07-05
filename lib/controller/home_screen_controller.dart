@@ -13,6 +13,12 @@ class DashboardScreenController extends ChangeNotifier {
   List<DashboardModel> _stockStatus = [];
   List<DashboardModel> get stockStatus => _stockStatus;
 
+  List<GasCylinder> _allCylinder = [];
+  List<GasCylinder> get allCylinder => _allCylinder;
+
+  List<GasCylinder> _filteredCylinder = [];
+  List<GasCylinder> get filteredCylinder => _filteredCylinder;
+
   List<GasCylinder> _unregisteredCylinder = [];
   List<GasCylinder> get unregisteredCylinder => _unregisteredCylinder;
 
@@ -21,8 +27,29 @@ class DashboardScreenController extends ChangeNotifier {
     notifyListeners();
   }
 
+  loadAllCylinder() async {
+    _allCylinder = await MongoDatabase.fetchAllRegisteredCylinderList();
+    _filteredCylinder = List.from(_allCylinder);
+    notifyListeners();
+  }
+
+  filterCylinder(String cylNum) {
+    if (cylNum.isEmpty) {
+      _filteredCylinder = _allCylinder;
+    } else {
+      _filteredCylinder =
+          _allCylinder.where((e) => e.gasId.contains(cylNum)).toList();
+    }
+    notifyListeners();
+  }
+
   Future loadData() async {
     _stockStatus.clear();
+
+    if (MongoDatabase.db!.isConnected == false) {
+      await MongoDatabase.connect();
+    }
+
     await Future.delayed(const Duration(seconds: 2));
     for (var element in Locations) {
       _stockStatus.add(DashboardModel.fromObjectMap(
@@ -45,6 +72,12 @@ class DashboardScreenController extends ChangeNotifier {
   deleteRegistration(String gasId) async {
     await MongoDatabase.deletePendingRegistration(gasId);
     loadUnregisteredCylinders();
+    notifyListeners();
+  }
+
+  Future changeGasLocation(String gasId, String location) async {
+    await MongoDatabase.changeCylinderLocation(gasId, location);
+    await loadData();
     notifyListeners();
   }
 }

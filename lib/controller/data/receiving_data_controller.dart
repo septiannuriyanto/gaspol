@@ -76,9 +76,11 @@ class DataController extends ChangeNotifier {
       bool isPartial = false;
       bool isFull = false;
 
-      List<GasCylinder> _testPartialCylinders = _cylinderList
-          .where((listItem) => listItem.gasId.contains(_cylinderNumber))
-          .toList();
+      List<GasCylinder> _testPartialCylinders = _cylinderNumber == "*"
+          ? _cylinderList
+          : cylinderList
+              .where((listItem) => listItem.gasId.contains(_cylinderNumber))
+              .toList();
       _filteredCylinderList.clear();
       _filteredCylinderList = _testPartialCylinders;
 

@@ -37,7 +37,7 @@ class ReceivingScreenController extends ChangeNotifier {
   }
 
   void resetUIReceivingStates() {
-    _poNumber = 'Input WR Number';
+    _poNumber = 'Input PO Number';
     _dateReceived = null;
     _isSet = false;
     _stepper = 1;

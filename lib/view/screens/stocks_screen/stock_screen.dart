@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:gaspol/controller/app_config.dart';
 import 'package:gaspol/controller/home_screen_controller.dart';
 import 'package:gaspol/controller/switches_controller.dart';
 import 'package:gaspol/models/gas_cylinder.dart';
@@ -49,8 +50,8 @@ class StockScreen extends StatelessWidget {
                   icon: Icon(
                     Icons.list,
                     color: _dbController.dashboardMode == DashboardMode.SOH
-                        ? MainColor.brandColor
-                        : MainColor.getColor(1),
+                        ? Colors.white
+                        : Colors.white38,
                   )),
               IconButton(
                   onPressed: () {
@@ -59,8 +60,8 @@ class StockScreen extends StatelessWidget {
                   icon: Icon(
                     Icons.location_on_outlined,
                     color: _dbController.dashboardMode == DashboardMode.LOCATION
-                        ? MainColor.brandColor
-                        : MainColor.getColor(1),
+                        ? Colors.white
+                        : Colors.white38,
                   )),
               IconButton(
                   onPressed: () async {
@@ -72,8 +73,8 @@ class StockScreen extends StatelessWidget {
                     Icons.queue,
                     color: _dbController.dashboardMode ==
                             DashboardMode.REGISTRATION
-                        ? MainColor.brandColor
-                        : MainColor.getColor(1),
+                        ? Colors.white
+                        : Colors.white38,
                   )),
             ],
           ),
@@ -92,6 +93,7 @@ class StockScreen extends StatelessWidget {
   _buildStockDashboard(BuildContext context) {
     DashboardScreenController _dbController =
         Provider.of<DashboardScreenController>(context);
+
     return Container(
       constraints: BoxConstraints(
         minHeight: getW(context),
@@ -118,7 +120,7 @@ class StockScreen extends StatelessWidget {
             Container(
               margin: kDefaultEdgeInsets,
               decoration: BoxDecoration(
-                  color: MainColor.getColor(1),
+                  border: Border.all(color: MainColor.getColor(0)),
                   borderRadius: kDefaultBorderRadiusAll),
               child: ListTile(
                 leading: Image.asset(
@@ -145,7 +147,7 @@ class StockScreen extends StatelessWidget {
             Container(
               margin: kDefaultEdgeInsets,
               decoration: BoxDecoration(
-                  color: MainColor.getColor(1),
+                  border: Border.all(color: MainColor.getColor(0)),
                   borderRadius: kDefaultBorderRadiusAll),
               child: ListTile(
                 leading: Image.asset(
@@ -172,7 +174,7 @@ class StockScreen extends StatelessWidget {
             Container(
               margin: kDefaultEdgeInsets,
               decoration: BoxDecoration(
-                  color: MainColor.getColor(1),
+                  border: Border.all(color: MainColor.getColor(0)),
                   borderRadius: kDefaultBorderRadiusAll),
               child: ListTile(
                 leading: Image.asset(
@@ -199,7 +201,7 @@ class StockScreen extends StatelessWidget {
             Container(
               margin: kDefaultEdgeInsets,
               decoration: BoxDecoration(
-                  color: MainColor.getColor(1),
+                  border: Border.all(color: MainColor.getColor(0)),
                   borderRadius: kDefaultBorderRadiusAll),
               child: ListTile(
                 leading: Image.asset(
@@ -232,6 +234,7 @@ class StockScreen extends StatelessWidget {
   _buildRegistrationDashboard(BuildContext context) {
     DashboardScreenController _dbController =
         Provider.of<DashboardScreenController>(context);
+    AppConfig _appConfig = Provider.of<AppConfig>(context);
     return Container(
       color: Colors.white30,
       child: Column(
@@ -283,6 +286,8 @@ class StockScreen extends StatelessWidget {
                                   subtitle: Text(e.gasName),
                                   trailing: PopupMenuButton(
                                       onSelected: (value) async {
+                                        final app_pass =
+                                            await _appConfig.getPass();
                                         final pass = await showDialog(
                                             context: context,
                                             builder: (BuildContext context) {
@@ -329,7 +334,7 @@ class StockScreen extends StatelessWidget {
                                               );
                                             });
 
-                                        if (pass != "scal4r") {
+                                        if (pass != app_pass) {
                                           cSnackbar(
                                               context, "Password Salah!", 1);
                                           return;

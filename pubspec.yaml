@@ -46,6 +46,9 @@ dependencies:
   flutter_dotenv: ^5.1.0
   timer_controller: ^1.0.0
   custom_timer: ^0.2.3
+  flutter_zxing: ^1.7.0
+  mobile_scanner: ^5.1.1
+  grouped_list: ^6.0.0
 
 
 dev_dependencies:
@@ -113,6 +116,7 @@ flutter:
     - lib/assets/image/gaspol-landscape-white.png
     - lib/assets/image/gaspol-text-trans.png
     - lib/assets/image/gaspol-text-white.png
+    - lib/assets/image/new-update.png
     - .env.development
     - .env.production
 

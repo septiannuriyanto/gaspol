@@ -8,16 +8,25 @@ import 'package:gaspol/view/components/atomic/widget_props.dart';
 import 'package:gaspol/view/components/themes/colors.dart';
 import 'package:gaspol/view/components/themes/constants.dart';
 import 'package:gaspol/view/components/themes/layouts.dart';
+import 'package:gaspol/view/components/widgets/custom_button.dart';
+import 'package:gaspol/view/components/widgets/custom_textfield.dart';
 import 'package:gaspol/view/components/widgets/glassmorphism.dart';
+import 'package:gaspol/view/dialogs/custom_snackbar.dart';
 import 'package:gaspol/view/screens/issuing_screen/issuing_screen.dart';
 import 'package:gaspol/view/screens/receiving_screen/receiving_screen.dart';
 import 'package:gaspol/view/screens/stocks_screen/stock_screen.dart';
+import 'package:gaspol/view/screens/stocktaking_screen/stocktaking_screen.dart';
 import 'package:gaspol/view/screens/update_version_screen/update_version_screen.dart';
 import 'package:provider/provider.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   HomeScreen({super.key});
 
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   List<Widget> childWidget = [
     StockScreen(),
     ReceivingScreen(),
@@ -39,12 +48,18 @@ class HomeScreen extends StatelessWidget {
   GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     PageNumController _page = Provider.of(context);
     DashboardScreenController _dbController =
         Provider.of<DashboardScreenController>(context);
     AppConfig _appConfig = Provider.of<AppConfig>(context);
-    checkisNewest(_appConfig.isNewestVersion(), context);
+    // checkisNewest(_appConfig.isNewestVersion(), context);
 
     return Stack(
       children: [
@@ -77,6 +92,61 @@ class HomeScreen extends StatelessWidget {
                     checkisNewest(_appConfig.isNewestVersion(), context);
                     _dbController.loadData();
                   },
+                ),
+                Visibility(
+                  visible:
+                      _dbController.dashboardMode == DashboardMode.REGISTRATION,
+                  child: IconButton(
+                    icon: Icon(Icons.verified_user_outlined),
+                    onPressed: () async {
+                      final app_pass = await _appConfig.getPass();
+                      final pass = await showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            var passs;
+                            return Dialog(
+                              backgroundColor: Colors.transparent,
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Container(
+                                  color: Colors.white,
+                                  height: 160,
+                                  width: 200,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Column(
+                                      children: [
+                                        vSpace(10),
+                                        Text("Enter Admin Password"),
+                                        CustomTextField(
+                                          obscureText: true,
+                                          onChanged: (p0) => passs = p0,
+                                        ),
+                                        vSpace(20),
+                                        CButton(
+                                            buttonColor: MainColor.brandColor,
+                                            onPressed: () {
+                                              Navigator.pop(context, passs);
+                                            })
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          });
+
+                      if (pass != app_pass) {
+                        cSnackbar(context, "Password Salah!", 1);
+                        return;
+                      }
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (BuildContext context) {
+                        return StockTakingScreen();
+                      }));
+                      cSnackbar(context, "Welcome", 1);
+                    },
+                  ),
                 )
               ],
             ),
